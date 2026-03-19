@@ -41,7 +41,7 @@ GRILLE_FIN = [["", "", "O", "", "", "", "", ""],
 
 def est_grille_valide(grille):
     """renvoie True si grille est valide, False sinon
-    une grille es consideree valide si elle est une matrice carre non vide de taille 8"""
+    une grille es consideree valide si elle est une matrice carre de taille 8 de taille 8"""
     if not type(grille) == list:
         return False
     elif len(grille) != 8:
@@ -58,7 +58,7 @@ def est_grille_valide(grille):
 def afficher_grille(grille, joueur):
     """affiche la grille de jeu a l'ecran ainsi que la personne a qui c'est le tour,
     joueur est un str, 'X' ou 'O'"""
-    assert est_grille_valide(grille), "grille doit etre une matrice non vide"
+    assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
     assert joueur == "0" or joueur == "X", "parametre joueur invalide"
 
     print("-"*33)
@@ -113,10 +113,10 @@ def est_dans_grille(ligne, colonne,  grille):
     """renvoie vraie si la case aux coordonnes (ligne, colonne) existe dans grille, faux sinon
     ligne est un str,
     colonne est un int,
-    grille est une matrice carre non vide"""
+    grille est une matrice carre de taille 8"""
     assert type(ligne) == str, "ligne doit etre un str"
     assert type(colonne) == int, "colonne doit etre un int"
-    assert est_grille_valide(grille), "grille doit etre une matrice carre non vide"
+    assert est_grille_valide(grille), "grille doit etre une matrice carre de taille 8"
     assert est_au_bon_format(ligne + str(colonne)), "ligne et colonne doivent etre au bon format"
 
     i_ligne = lettre_vers_nombre(ligne)
@@ -127,9 +127,9 @@ def est_dans_grille(ligne, colonne,  grille):
 def sont_coordonnees_correctes(coordonnees, grille):
     """renvoie True si coordonnees est au bon format et est dans grille,
     coordonnees est un str,
-    grille est une matrice carre non vide"""
+    grille est une matrice carre de taille 8"""
     assert type(coordonnees) == str, "coordonnees doit etre un str"
-    assert est_grille_valide(grille), "grille doit etre une matrice carre non vide"
+    assert est_grille_valide(grille), "grille doit etre une matrice carre de taille 8"
 
     if not est_au_bon_format(coordonnees):
         return False
@@ -147,7 +147,7 @@ def demander_coordonnees_piece_a_deplacer(grille):
     x est compris enre A et H compris,
     y est compris entre 1 et 8 compris
     renvoie un str"""
-    assert est_grille_valide(grille), "grille doit etre une matrice non vide"
+    assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
 
     coordonnees_entrees = input("Entrez les coordonnees de la piece a deplacer [A1-H8] > ")
 
@@ -166,7 +166,7 @@ def demander_coordonnees_case_arrivee(grille):
     x est compris enre A et H compris,
     y est compris entre 1 et 8 compris
     renvoie le str xy"""
-    assert est_grille_valide(grille), "grille doit etre une matrice non vide"
+    assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
 
     coordonnees_entrees = input("Entrez les coordonnees de la case d'arrivee [A1-H8] > ")
 
@@ -179,9 +179,13 @@ def demander_coordonnees_case_arrivee(grille):
 
 
 
-def atelier_2(grille):
+def atelier_2(grille_debut, grille_milieu, grille_fin):
     """Cette fonction ne sert que pour l evaluation par les pairs lors de l atelier 2,
     elle sert a ce que les pairs puissent interagir et tester les autres fonctions plus facilement"""
+    assert est_grille_valide(grille_debut), "grille_debut doit etre une matrice carre de taille 8"
+    assert est_grille_valide(grille_milieu), "grille_milieu doit etre une matrice carre de taille 8"
+    assert est_grille_valide(grille_fin), "grille_fin doit etre une matrice carre de taille 8"
+
     fin = False
     while not fin:
         print("-"*50)
@@ -194,15 +198,16 @@ def atelier_2(grille):
 
         entree_utilisateur = input("En attente de votre reponse... > ")
 
+        # suivant le choix de l utilisateur on appelle les fonctions correspondantes
         if entree_utilisateur == "1":
-            afficher_grille(grille, "X")
+            afficher_grille(grille_debut, "X")
         elif entree_utilisateur == "2":
-            afficher_grille(grille, "X")
+            afficher_grille(grille_milieu, "X")
         elif entree_utilisateur == "3":
-            afficher_grille(grille, "X")
+            afficher_grille(grille_fin, "X")
         elif entree_utilisateur == "4":
-            coordonnes_piece_a_deplacer = demander_coordonnees_piece_a_deplacer(grille)
-            coordonnes_case_arrivee = demander_coordonnees_case_arrivee(grille)
+            coordonnes_piece_a_deplacer = demander_coordonnees_piece_a_deplacer(grille_debut)
+            coordonnes_case_arrivee = demander_coordonnees_case_arrivee(grille_debut)
             
             print("\nCase de la piece a deplacer : ", coordonnes_piece_a_deplacer)
             print("Case d'arrivee : ", coordonnes_case_arrivee)
@@ -210,8 +215,8 @@ def atelier_2(grille):
         elif entree_utilisateur == "5":
             fin = True
         else:
+            # si l'utilisateur entre quelque chose d autres, on redemande lors du prochain passage en boucle
             pass
             
 
-grille_actuelle = GRILLE_DEBUT
-atelier_2(grille_actuelle)
+atelier_2(GRILLE_DEBUT, GRILLE_MILIEU, GRILLE_FIN)
