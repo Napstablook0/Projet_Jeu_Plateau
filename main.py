@@ -119,8 +119,8 @@ def est_dans_grille(ligne, colonne,  grille):
     assert est_grille_valide(grille), "grille doit etre une matrice carre non vide"
     assert est_au_bon_format(ligne + str(colonne)), "ligne et colonne doivent etre au bon format"
 
-    nombre_ligne = lettre_vers_nombre(ligne)
-    return len(grille) >= colonne and len(grille[0]) >= nombre_ligne
+    i_ligne = lettre_vers_nombre(ligne)
+    return len(grille) >= colonne and len(grille[0]) >= i_ligne
 
 
 
@@ -181,7 +181,7 @@ def demander_coordonnees_case_arrivee(grille):
 
 def atelier_2(grille):
     """Cette fonction ne sert que pour l evaluation par les pairs lors de l atelier 2,
-    elle sert a ce que les pairs puissent interagir et tester les fonctions"""
+    elle sert a ce que les pairs puissent interagir et tester les autres fonctions plus facilement"""
     fin = False
     while not fin:
         print("-"*50)
