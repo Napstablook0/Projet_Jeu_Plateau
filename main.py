@@ -168,7 +168,7 @@ def demander_coordonnees_piece_a_deplacer(grille):
     coordonnees_entrees = input("Entrez les coordonnees de la piece a deplacer [A1-H8] > ")
 
     while not sont_coordonnees_correctes(coordonnees_entrees, grille):
-        print("les coordoonnes sont invalides")
+        print("les coordoonnes entrees sont invalides")
         coordonnees_entrees = input("Entrez les coordonnees de la piece a deplacer [A1-H8] > ")
         
     
@@ -186,6 +186,7 @@ def demander_coordonnees_case_arrivee(grille):
 
     coordonnees_entrees = input("Entrez les coordonnees de la case d'arrivee [A1-H8] > ")
 
+    # indication pour les pairs : la fonction sont_coordonnees_correctes appelle la fonction est_dans_grille
     while not sont_coordonnees_correctes(coordonnees_entrees, grille):
         print("les coordoonnes entrees sont invalides")
         coordonnees_entrees = input("Entrez les coordonnees de la case d'arrivee [A1-H8] > ")
