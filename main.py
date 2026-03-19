@@ -104,25 +104,9 @@ def lettre_vers_nombre(lettre):
     assert len(lettre) == 1, "lettre doit etre un unique caractere"
     assert lettre in "ABCDEFGH", "lettre doit etre dans ABCDEFGH"
 
-    if lettre == "A":
-        return 1
-    elif lettre == "B":
-        return 2
-    elif lettre == "C":
-        return 3
-    elif lettre == "D":
-        return 4
-    elif lettre == "E":
-        return 5
-    elif lettre == "F":
-        return 6
-    elif lettre == "G":
-        return 7
-    elif lettre == "H":
-        return 8
-    else:
-        # Cas impossible
-        pass
+    dico_convertion = {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6, "G": 7, "H": 8}
+
+    return dico_convertion[lettre]
 
 
 def est_dans_grille(ligne, colonne,  grille):
