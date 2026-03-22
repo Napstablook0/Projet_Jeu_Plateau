@@ -5,7 +5,7 @@
 """Le plateau de jeu est en 8x8"""
 
 
-# variables de configurations de tests
+# ---------------- variables de configurations de tests ----------------
 
 GRILLE_DEBUT = [["", "O", "", "O", "", "O", "", "O"],
                 ["O", "", "O", "", "O", "", "O", ""],
@@ -347,7 +347,7 @@ def tests():
     print("Tests effectues")
 
 
-# fonction pour effectuer des tests manuels
+# fonction pour effectuer des verification d affichage et d entree utilisateur
 def atelier_2(grille_debut, grille_milieu, grille_fin):
     """Cette fonction ne sert que pour l evaluation par les pairs lors de l atelier 2 et effectuer des tests plus facilement"""
     assert est_grille_valide(grille_debut), "grille_debut doit etre une matrice carre de taille 8"
@@ -375,7 +375,7 @@ def atelier_2(grille_debut, grille_milieu, grille_fin):
             afficher_grille(grille_milieu, "X", 3, 3)
         elif entree_utilisateur == "3":
             afficher_grille(grille_fin, "X", 10, 9)
-            
+
         elif entree_utilisateur == "4":
             coordonnes_piece_a_deplacer = demander_coordonnees_piece_a_deplacer(grille_debut)
             coordonnes_case_arrivee = demander_coordonnees_case_arrivee(grille_debut)
@@ -393,8 +393,5 @@ def atelier_2(grille_debut, grille_milieu, grille_fin):
 
 
 
-
-
-            
 
 atelier_2(GRILLE_DEBUT, GRILLE_MILIEU, GRILLE_FIN)
