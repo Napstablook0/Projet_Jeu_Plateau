@@ -129,12 +129,16 @@ def afficher_ligne(grille, i_ligne):
     for i_colonne in range(len(grille[0])):
 
         case = grille[i_ligne][i_colonne]
+        # separation des cases
         print("| ", end="")
+        
+        # affichage de la case
         if case == "":
             print("  ", end="")
         else:
             print(case + " ", end="")
 
+    # fin de la ligne
     print("|")
 
 
