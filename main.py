@@ -41,18 +41,23 @@ GRILLE_FIN = [["", "", "O", "", "", "", "", ""],
 
 def est_grille_valide(grille):
     """renvoie True si grille est valide, False sinon
-    une grille es consideree valide si elle est une matrice carre de taille 8 de taille 8"""
+    une grille est consideree valide si elle est une matrice carre de taille 8 de taille 8"""
+
+    VALEURS_VALIDES = ["", "X", "O"]
+
     if not type(grille) == list:
         return False
-    elif len(grille) != 8:
-        return False
-    elif len(grille[0]) != 8:
-        return False
-    elif type(grille[0]) != list:
-        return False
-    else:
-        return True
-
+    
+    for ligne in grille:
+        if type(ligne) != list:
+            return False
+        elif len(ligne) != 8:
+            return False
+        for valeur in ligne:
+            if valeur not in VALEURS_VALIDES:
+                return False
+            
+    return True
 
 
 def afficher_grille(grille, joueur, pieces_capturees_X, pieces_capturees_O):
