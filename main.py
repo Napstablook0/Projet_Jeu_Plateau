@@ -104,7 +104,6 @@ def est_dans_grille(ligne, colonne,  grille):
     assert type(ligne) == str, "ligne doit etre un str"
     assert type(colonne) == int, "colonne doit etre un int"
     assert est_grille_valide(grille), "grille doit etre une matrice carre de taille 8"
-    assert est_au_bon_format(ligne + str(colonne)), "ligne et colonne doivent etre au bon format"
 
     i_ligne = lettre_vers_nombre(ligne)
     return len(grille) >= colonne and len(grille[0]) >= i_ligne
