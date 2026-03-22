@@ -55,9 +55,11 @@ def est_grille_valide(grille):
 
 
 
-def afficher_grille(grille, joueur):
-    """affiche la grille de jeu a l'ecran ainsi que la personne a qui c'est le tour,
-    joueur est un str, 'X' ou 'O' correspondant du joueur qui doit jouer ce tour ci"""
+def afficher_grille(grille, joueur, pieces_capturees_X, pieces_capturees_O):
+    """affiche l etat actuel de la partie tel que le plateau, a qui c est le tour et les nombres de pieces capturees,
+    joueur est un str, 'X' ou 'O' correspondant du joueur qui doit jouer ce tour ci
+    pieces_capturees_X est un int correspondant au nombre de pieces (X) capturees par le joueur O
+    pieces_capturees_O est un int correspondant au nombre de pieces (O) capturees par le joueur X"""
     assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
     assert joueur == "0" or joueur == "X", "parametre joueur invalide"
 
@@ -69,9 +71,10 @@ def afficher_grille(grille, joueur):
 
     for i_ligne in range(len(grille)):
 
-        # afficher la lettre de la ligne
+        # afficher la lettre de la ligne actuelle
         print(LETTRES[i_ligne] + " ", end="")
 
+        # affichage d une ligne
         for i_colonne in range(len(grille[0])):
 
             case = grille[i_ligne][i_colonne]
@@ -84,6 +87,13 @@ def afficher_grille(grille, joueur):
         print("|")
 
     print("  " + "-"*33)
+
+    # affichage des pieces capturees
+    print("Pieces capturees :")
+    print("   " + "X " * pieces_capturees_X)
+    print("   " + "O " * pieces_capturees_O)
+    print()
+
     print("C'est au tour du joueur : ", joueur)
 
 
@@ -204,14 +214,15 @@ def atelier_2(grille_debut, grille_milieu, grille_fin):
         print("5 > fermer le programme\n")
 
         entree_utilisateur = input("En attente de votre reponse... > ")
+        print()
 
         # suivant le choix de l utilisateur on appelle les fonctions correspondantes
         if entree_utilisateur == "1":
-            afficher_grille(grille_debut, "X")
+            afficher_grille(grille_debut, "X", 0, 0)
         elif entree_utilisateur == "2":
-            afficher_grille(grille_milieu, "X")
+            afficher_grille(grille_milieu, "X", 3, 3)
         elif entree_utilisateur == "3":
-            afficher_grille(grille_fin, "X")
+            afficher_grille(grille_fin, "X", 10, 9)
         elif entree_utilisateur == "4":
             coordonnes_piece_a_deplacer = demander_coordonnees_piece_a_deplacer(grille_debut)
             coordonnes_case_arrivee = demander_coordonnees_case_arrivee(grille_debut)
