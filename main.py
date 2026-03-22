@@ -57,12 +57,13 @@ def est_grille_valide(grille):
 
 def afficher_grille(grille, joueur):
     """affiche la grille de jeu a l'ecran ainsi que la personne a qui c'est le tour,
-    joueur est un str, 'X' ou 'O'"""
+    joueur est un str, 'X' ou 'O' correspondant du joueur qui doit jouer ce tour ci"""
     assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
     assert joueur == "0" or joueur == "X", "parametre joueur invalide"
 
     LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"]
 
+    # afficher les numero des colonnes
     print("    1   2   3   4   5   6   7   8")
     print("  " + "-"*33)
 
