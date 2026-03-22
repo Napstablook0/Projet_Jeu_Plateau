@@ -200,12 +200,11 @@ def demander_coordonnees_piece_a_deplacer(grille):
 
     coordonnees_entrees = input("Entrez les coordonnees de la piece a deplacer [A1-H8] > ")
 
-    # indication pour les pairs : la fonction sont_coordonnees_correctes utilise la fonction est_dans_grille
+    # indication pour les pairs (pour le bareme) : la fonction sont_coordonnees_correctes utilise la fonction est_dans_grille
     while not sont_coordonnees_correctes(coordonnees_entrees, grille):
         print("les coordoonnes entrees sont invalides")
         coordonnees_entrees = input("Entrez les coordonnees de la piece a deplacer [A1-H8] > ")
         
-    
     return coordonnees_entrees
 
 
@@ -379,8 +378,8 @@ def atelier_2(grille_debut, grille_milieu, grille_fin):
             coordonnes_piece_a_deplacer = demander_coordonnees_piece_a_deplacer(grille_debut)
             coordonnes_case_arrivee = demander_coordonnees_case_arrivee(grille_debut)
             
-            print("\nCase de la piece a deplacer : ", coordonnes_piece_a_deplacer)
-            print("Case d'arrivee : ", coordonnes_case_arrivee)
+            print("\nCase de la piece a deplacer :", coordonnes_piece_a_deplacer)
+            print("Case d'arrivee :", coordonnes_case_arrivee)
         
         elif entree_utilisateur == "5":
             tests()
