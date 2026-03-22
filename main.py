@@ -57,13 +57,20 @@ def est_grille_valide(grille):
 
 def afficher_grille(grille, joueur):
     """affiche la grille de jeu a l'ecran ainsi que la personne a qui c'est le tour,
-    joueur est un str, 'X' ou 'O'"""
+    joueur est un str, 'X' ou 'O' correspondant du joueur qui doit jouer ce tour ci"""
     assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
     assert joueur == "0" or joueur == "X", "parametre joueur invalide"
 
-    print("-"*33)
+    LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"]
+
+    # afficher les numero des colonnes
+    print("    1   2   3   4   5   6   7   8")
+    print("  " + "-"*33)
 
     for i_ligne in range(len(grille)):
+
+        # afficher la lettre de la ligne
+        print(LETTRES[i_ligne] + " ", end="")
 
         for i_colonne in range(len(grille[0])):
 
@@ -76,7 +83,7 @@ def afficher_grille(grille, joueur):
 
         print("|")
 
-    print("-"*33)
+    print("  " + "-"*33)
     print("C'est au tour du joueur : ", joueur)
 
 
@@ -85,11 +92,11 @@ def est_au_bon_format(message):
     message est un str"""
     assert type(message) == str, "message doit etre un str"
 
-    ALPHABET = ["A", "B", "C", "D", "E", "F", "G", "H"]
+    LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"]
     
     if len(message) != 2:
         return False
-    elif message[0] not in ALPHABET:
+    elif message[0] not in LETTRES:
         return False
     elif message[1] not in ["1", "2", "3", "4", "5", "6", "7", "8"]:
         return False
