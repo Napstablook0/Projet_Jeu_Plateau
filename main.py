@@ -53,6 +53,7 @@ def est_grille_valide(grille):
             return False
         elif len(ligne) != 8:
             return False
+        
         for valeur in ligne:
             if valeur not in VALEURS_VALIDES:
                 return False
@@ -148,7 +149,7 @@ def est_dans_grille(ligne, colonne,  grille):
 
 def sont_coordonnees_correctes(coordonnees, grille):
     """renvoie True si coordonnees est au bon format et est dans grille,
-    coordonnees est un str,
+    coordonnees est un str, e.g : A3
     grille est une matrice carre de taille 8"""
     assert type(coordonnees) == str, "coordonnees doit etre un str"
     assert est_grille_valide(grille), "grille doit etre une matrice carre de taille 8"
@@ -173,6 +174,7 @@ def demander_coordonnees_piece_a_deplacer(grille):
 
     coordonnees_entrees = input("Entrez les coordonnees de la piece a deplacer [A1-H8] > ")
 
+    # indication pour les pairs : la fonction sont_coordonnees_correctes utilise la fonction est_dans_grille
     while not sont_coordonnees_correctes(coordonnees_entrees, grille):
         print("les coordoonnes entrees sont invalides")
         coordonnees_entrees = input("Entrez les coordonnees de la piece a deplacer [A1-H8] > ")
@@ -187,12 +189,12 @@ def demander_coordonnees_case_arrivee(grille):
     A0 correspond a la case en bas a gauche
     x est compris enre A et H compris,
     y est compris entre 1 et 8 compris
-    renvoie le str xy"""
+    renvoie le str xy entre par l utilisateur"""
     assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
 
     coordonnees_entrees = input("Entrez les coordonnees de la case d'arrivee [A1-H8] > ")
 
-    # indication pour les pairs : la fonction sont_coordonnees_correctes appelle la fonction est_dans_grille
+    # indication pour les pairs : la fonction sont_coordonnees_correctes utilise la fonction est_dans_grille
     while not sont_coordonnees_correctes(coordonnees_entrees, grille):
         print("les coordoonnes entrees sont invalides")
         coordonnees_entrees = input("Entrez les coordonnees de la case d'arrivee [A1-H8] > ")
@@ -202,8 +204,7 @@ def demander_coordonnees_case_arrivee(grille):
 
 
 def atelier_2(grille_debut, grille_milieu, grille_fin):
-    """Cette fonction ne sert que pour l evaluation par les pairs lors de l atelier 2,
-    elle sert a ce que les pairs puissent interagir et tester les autres fonctions plus facilement"""
+    """Cette fonction ne sert que pour l evaluation par les pairs lors de l atelier 2 et effectuer des tests plus facilement"""
     assert est_grille_valide(grille_debut), "grille_debut doit etre une matrice carre de taille 8"
     assert est_grille_valide(grille_milieu), "grille_milieu doit etre une matrice carre de taille 8"
     assert est_grille_valide(grille_fin), "grille_fin doit etre une matrice carre de taille 8"
