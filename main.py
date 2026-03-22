@@ -5,7 +5,7 @@
 """Le plateau de jeu est en 8x8"""
 
 
-
+# variables de configurations de tests
 
 GRILLE_DEBUT = [["", "O", "", "O", "", "O", "", "O"],
                 ["O", "", "O", "", "O", "", "O", ""],
@@ -29,72 +29,37 @@ GRILLE_MILIEU = [["", "", "", "O", "", "O", "", "O"],
 
 
 GRILLE_FIN = [["", "", "O", "", "", "", "", ""],
-            ["X", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "O", "", ""],
-            ["", "O", "", "", "", "", "", ""],
-            ["", "", "", "", "", "X", "", ""]]
+             ["X", "", "", "", "", "", "", ""],
+             ["", "", "", "", "", "", "", ""],
+             ["", "", "", "", "", "", "", ""],
+             ["", "", "", "", "", "", "", ""],
+             ["", "", "", "", "", "O", "", ""],
+             ["", "O", "", "", "", "", "", ""],
+             ["", "", "", "", "", "X", "", ""]]
 
 
+# -------------------------------- fonctions de verifications --------------------------------
 
 def est_grille_valide(grille):
     """renvoie True si grille est valide, False sinon
-    une grille es consideree valide si elle est une matrice carre de taille 8 de taille 8"""
+    une grille est consideree valide si elle est une matrice carre de taille 8 de taille 8"""
+
+    VALEURS_VALIDES = ["", "X", "O"]
+
     if not type(grille) == list:
         return False
-    elif len(grille) != 8:
-        return False
-    elif len(grille[0]) != 8:
-        return False
-    elif type(grille[0]) != list:
-        return False
-    else:
-        return True
-
-
-
-def afficher_grille(grille, joueur, pieces_capturees_X, pieces_capturees_O):
-    """affiche l etat actuel de la partie tel que le plateau, a qui c est le tour et les nombres de pieces capturees,
-    joueur est un str, 'X' ou 'O' correspondant du joueur qui doit jouer ce tour ci
-    pieces_capturees_X est un int correspondant au nombre de pieces (X) capturees par le joueur O
-    pieces_capturees_O est un int correspondant au nombre de pieces (O) capturees par le joueur X"""
-    assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
-    assert joueur == "0" or joueur == "X", "parametre joueur invalide"
-
-    LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"]
-
-    # afficher les numero des colonnes
-    print("    1   2   3   4   5   6   7   8")
-    print("  " + "-"*33)
-
-    for i_ligne in range(len(grille)):
-
-        # afficher la lettre de la ligne actuelle
-        print(LETTRES[i_ligne] + " ", end="")
-
-        # affichage d une ligne
-        for i_colonne in range(len(grille[0])):
-
-            case = grille[i_ligne][i_colonne]
-            print("| ", end="")
-            if case == "":
-                print("  ", end="")
-            else:
-                print(case + " ", end="")
-
-        print("|")
-
-    print("  " + "-"*33)
-
-    # affichage des pieces capturees
-    print("Pieces capturees :")
-    print("   " + "X " * pieces_capturees_X)
-    print("   " + "O " * pieces_capturees_O)
-    print()
-
-    print("C'est au tour du joueur : ", joueur)
+    
+    for ligne in grille:
+        if type(ligne) != list:
+            return False
+        elif len(ligne) != 8:
+            return False
+        
+        for valeur in ligne:
+            if valeur not in VALEURS_VALIDES:
+                return False
+            
+    return True
 
 
 def est_au_bon_format(message):
@@ -112,19 +77,22 @@ def est_au_bon_format(message):
         return False
     else:
         return True
+    
 
+def sont_coordonnees_correctes(coordonnees, grille):
+    """renvoie True si coordonnees est au bon format et est dans grille,
+    coordonnees est un str, e.g : A3
+    grille est une matrice carre de taille 8"""
+    assert type(coordonnees) == str, "coordonnees doit etre un str"
+    assert est_grille_valide(grille), "grille doit etre une matrice carre de taille 8"
 
-def lettre_vers_nombre(lettre):
-    """converti une coordonnee en lettre vers sa representation en nombre, A sera converti en 1, B en 2, etc..
-    lettre est une des lettres majuscules suivante : ABCDEFGH"""
-    assert type(lettre) == str, "lettre doit etre un str"
-    assert len(lettre) == 1, "lettre doit etre un unique caractere"
-    assert lettre in "ABCDEFGH", "lettre doit etre dans ABCDEFGH"
-
-    dico_convertion = {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6, "G": 7, "H": 8}
-
-    return dico_convertion[lettre]
-
+    if not est_au_bon_format(coordonnees):
+        return False
+    elif not est_dans_grille(coordonnees[0], int(coordonnees[1]), grille):
+        return False
+    else:
+        return True
+    
 
 def est_dans_grille(ligne, colonne,  grille):
     """renvoie vraie si la case aux coordonnes (ligne, colonne) existe dans grille, faux sinon
@@ -141,21 +109,82 @@ def est_dans_grille(ligne, colonne,  grille):
 
 
 
-def sont_coordonnees_correctes(coordonnees, grille):
-    """renvoie True si coordonnees est au bon format et est dans grille,
-    coordonnees est un str,
-    grille est une matrice carre de taille 8"""
-    assert type(coordonnees) == str, "coordonnees doit etre un str"
-    assert est_grille_valide(grille), "grille doit etre une matrice carre de taille 8"
+# -------------------------------- fonctions d affichage --------------------------------
 
-    if not est_au_bon_format(coordonnees):
-        return False
-    elif not est_dans_grille(coordonnees[0], int(coordonnees[1]), grille):
-        return False
-    else:
-        return True
-            
-            
+
+def afficher_ligne(grille, i_ligne):
+    """affiche une ligne de la grille
+    i_ligne est un int correspondant a un indice de grille de la ligne a afficher"""
+    assert est_grille_valide(grille), "grille doit etre une matrice carre non vide"
+    assert type(i_ligne) == int, "i_ligne doit etre un entier correspondant a un indice de grille"
+    assert i_ligne >= 0 and i_ligne < len(grille), "i_ligne doit etre un entier correspondant a un indice de grille"
+
+    LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"]
+
+    # afficher la lettre de la ligne actuelle
+    print(LETTRES[i_ligne] + " ", end="")
+
+    # affichage de la ligne
+    for i_colonne in range(len(grille[0])):
+
+        case = grille[i_ligne][i_colonne]
+        print("| ", end="")
+        if case == "":
+            print("  ", end="")
+        else:
+            print(case + " ", end="")
+
+    print("|")
+
+
+def afficher_grille(grille, joueur, pieces_capturees_X, pieces_capturees_O):
+    """affiche l etat actuel de la partie tel que le plateau, a qui c est le tour et les nombres de pieces capturees,
+    joueur est un str, 'X' ou 'O' correspondant du joueur qui doit jouer ce tour ci
+    pieces_capturees_X est un int correspondant au nombre de pieces (X) capturees par le joueur O
+    pieces_capturees_O est un int correspondant au nombre de pieces (O) capturees par le joueur X"""
+    assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
+    assert joueur == "0" or joueur == "X", "parametre joueur invalide"
+
+    
+
+    # afficher les numero des colonnes
+    print("    1   2   3   4   5   6   7   8")
+    print("  " + "-"*33)
+
+    for i_ligne in range(len(grille)):
+
+        afficher_ligne(grille, i_ligne)
+
+    print("  " + "-"*33)
+
+    # affichage des pieces capturees
+    print("Pieces capturees :")
+    print("   " + "X " * pieces_capturees_X)
+    print("   " + "O " * pieces_capturees_O)
+    print()
+
+    print("C'est au tour du joueur : ", joueur)
+
+
+
+# -------------------------------- fonctions de conversion --------------------------------
+
+
+def lettre_vers_nombre(lettre):
+    """converti une coordonnee en lettre vers sa representation en nombre, A sera converti en 1, B en 2, etc..
+    lettre est une des lettres majuscules suivante : ABCDEFGH"""
+    assert type(lettre) == str, "lettre doit etre un str"
+    assert len(lettre) == 1, "lettre doit etre un unique caractere"
+    assert lettre in "ABCDEFGH", "lettre doit etre dans ABCDEFGH"
+
+    dico_convertion = {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6, "G": 7, "H": 8}
+
+    return dico_convertion[lettre]
+
+
+
+# -------------------------------- fonctions d entrees utilisateur --------------------------------
+
 
 def demander_coordonnees_piece_a_deplacer(grille):
     """demande a l'utilisateur deux coordonnees de la forme xy
@@ -168,6 +197,7 @@ def demander_coordonnees_piece_a_deplacer(grille):
 
     coordonnees_entrees = input("Entrez les coordonnees de la piece a deplacer [A1-H8] > ")
 
+    # indication pour les pairs : la fonction sont_coordonnees_correctes utilise la fonction est_dans_grille
     while not sont_coordonnees_correctes(coordonnees_entrees, grille):
         print("les coordoonnes entrees sont invalides")
         coordonnees_entrees = input("Entrez les coordonnees de la piece a deplacer [A1-H8] > ")
@@ -182,12 +212,12 @@ def demander_coordonnees_case_arrivee(grille):
     A0 correspond a la case en bas a gauche
     x est compris enre A et H compris,
     y est compris entre 1 et 8 compris
-    renvoie le str xy"""
+    renvoie le str xy entre par l utilisateur"""
     assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
 
     coordonnees_entrees = input("Entrez les coordonnees de la case d'arrivee [A1-H8] > ")
 
-    # indication pour les pairs : la fonction sont_coordonnees_correctes appelle la fonction est_dans_grille
+    # indication pour les pairs : la fonction sont_coordonnees_correctes utilise la fonction est_dans_grille
     while not sont_coordonnees_correctes(coordonnees_entrees, grille):
         print("les coordoonnes entrees sont invalides")
         coordonnees_entrees = input("Entrez les coordonnees de la case d'arrivee [A1-H8] > ")
@@ -195,10 +225,11 @@ def demander_coordonnees_case_arrivee(grille):
     return coordonnees_entrees
 
 
+# -------------------------------- fonctions de tests --------------------------------
+
 
 def atelier_2(grille_debut, grille_milieu, grille_fin):
-    """Cette fonction ne sert que pour l evaluation par les pairs lors de l atelier 2,
-    elle sert a ce que les pairs puissent interagir et tester les autres fonctions plus facilement"""
+    """Cette fonction ne sert que pour l evaluation par les pairs lors de l atelier 2 et effectuer des tests plus facilement"""
     assert est_grille_valide(grille_debut), "grille_debut doit etre une matrice carre de taille 8"
     assert est_grille_valide(grille_milieu), "grille_milieu doit etre une matrice carre de taille 8"
     assert est_grille_valide(grille_fin), "grille_fin doit etre une matrice carre de taille 8"
