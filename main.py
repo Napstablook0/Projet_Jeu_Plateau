@@ -59,7 +59,7 @@ def est_grille_valide(grille):
             if valeur not in VALEURS_VALIDES:
                 return False
             
-    return True
+    return len(grille) == 8
 
 
 def est_au_bon_format(message):
@@ -421,9 +421,17 @@ def test_est_grille_valide():
              ["X", "", "X", "", "X", "", "X"],
              ["", "X", "", "X", "", "X", ""]]
     
+    # grille vide donc invalide
+    grille4 = []
+
+    # grille vide donc invalide
+    grille5 = [[]]
+    
     assert est_grille_valide(grille1) == True, "test est_grille_valide"
     assert est_grille_valide(grille2) == False, "test est_grille_valide"
     assert est_grille_valide(grille3) == False, "test est_grille_valide"
+    assert est_grille_valide(grille4) == False, "test est_grille_valide"
+    assert est_grille_valide(grille5) == False, "test est_grille_valide"
 
 
 def tests():
