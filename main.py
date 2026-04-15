@@ -109,6 +109,21 @@ def est_dans_grille(ligne, colonne,  grille):
     return len(grille) >= colonne and len(grille[0]) >= i_ligne
 
 
+def est_deplacement_valide(grille, depart, arrivee, joueur):
+    """renvoie True si le deplacemen depart - arrivee est valide
+    depart et arrivee sont des coordonnees valides et decrivant un deplacement valide :
+    depart est un str, doit etre les coordonnees d une piece appartenant a joueur,
+    arrivee est un str, doit etre des coordonnees d une case vide
+    le deplacement depart - arrivee doit etre valide
+    joueur est un str, X ou O"""
+    assert est_grille_valide(grille), "grille invalide"
+    assert sont_coordonnees_correctes(depart), "coordonnees de depart non valide"
+    assert sont_coordonnees_correctes(arrivee), "coordonnees d arrivee non valide"
+    assert joueur == "X" or joueur == "O", "joueur invalide"
+
+    # TODO
+
+
 
 # -------------------------------- fonctions d affichage --------------------------------
 
@@ -229,6 +244,79 @@ def demander_coordonnees_case_arrivee(grille):
         coordonnees_entrees = input("Entrez les coordonnees de la case d'arrivee [A1-H8] > ")
     
     return coordonnees_entrees
+
+
+
+
+
+
+# -------------------------------- fonctions de deplacements --------------------------------
+
+
+def deplacement(grille, depart, arrivee, joueur):
+    """effectue un deplacementt si valide
+    depart et arrivee sont des coordonnees valides et decrivant un deplacement valide :
+    depart est un str, doit etre les coordonnees d une piece appartenant a joueur,
+    arrivee est un str, doit etre des coordonnees d une case vide
+    le deplacement depart - arrivee doit etre valide
+    joueur est un str, 'X' ou 'O'"""
+    assert est_grille_valide(grille), "grille non valide"
+    assert sont_coordonnees_correctes(depart), "coordonnees de depart non valide"
+    assert sont_coordonnees_correctes(arrivee), "coordonnees d arrivee non valide"
+    assert joueur == "X" or joueur == "O", "joueur invalide"
+
+    # TODO
+
+
+# -------------------------------- fonctions de controle --------------------------------
+
+
+def compter_pieces(grille, joueur):
+    """compte le nombre de pieces restant au joueur joueur
+    joueur est un str, 'X" ou 'O'"""
+    assert est_grille_valide(grille), "grille invalide"
+    assert joueur == "X" or joueur == "O", "joueur invalide"
+
+    compteur = 0
+    for ligne in grille:
+        for case in ligne:
+            compteur += case == joueur
+
+    return compteur
+
+
+def gagnant(grille, joueur):
+    """renvoie le str 'X' si le joueur X a gagne, 'O' si le joueur O a gagne, un str vide si la partie n est pas finie
+    joueur est un str, 'X" ou 'O'"""
+    assert est_dans_grille(grille), "grille invalide"
+    assert joueur == "X" or joueur == "O", "joueur invalide"
+
+    
+    if joueur == "X":
+        if compter_pieces(grille, "O") == 0:
+            return "X"
+        
+        
+    elif joueur == "O":
+        if compter_pieces(grille, "X") == 0:
+            return "O"
+        
+    return ""
+
+
+
+
+def effectuer_tour(grille, joueur):
+    """realise le tour d un joueur :
+    demande le deplacement souhaite a l utilisateur et modifie grille en consequence
+    joueur est un str, 'X' ou 'O'"""
+    assert est_grille_valide(grille), "grille invalide"
+    assert joueur == "X" or joueur == "O", "joueur invalide"
+
+    # TODO
+
+
+
 
 
 # -------------------------------- fonctions de tests --------------------------------
