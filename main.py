@@ -540,9 +540,12 @@ def gagnant(grille):
 
 def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
     """realise le tour d un joueur :
-    demande le deplacement souhaite a l utilisateur et modifie grille en consequence, cette fonction fait des affichages de la grille
-    cette fonction pre-suppose que le tour d avant a ete effectue de facon valide (i.e : le joueur adverse actuel ne peut pas faire de capture, sinon il l aurait fait au tour d avant)
-    joueur est un str, 'X' ou 'O'"""
+    demande le deplacement souhaite a l utilisateur et modifie grille en consequence,
+    cette fonction pre-suppose que le tour d avant a ete effectue de facon valide (i.e : le joueur adverse ne peut pas faire de capture,
+    sinon il l aurait fait au tour d avant)
+    joueur est un str, 'X' ou 'O', le joueur actuel,
+    pieces_capturees_X est un int, le nombre de pieces 'X' capturees
+    pieces_capturees_O est un int, le nombre de pieces 'O' capturees"""
     assert est_grille_valide(grille), "grille invalide"
     assert joueur == "X" or joueur == "O", "joueur invalide"
 
@@ -599,7 +602,7 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
 
 def trouver_indices_mort_subite(grille, joueur):
     """renvoie les indices de grille correspondant aux coordonnees de la case a laquelle se retrouvera la piece du joueur joueur apres un coup de mort subite
-    i.e : trouve la case d arrivee de la piece qui a declanchee la mort subite
+    i.e : trouve la case d arrivee de la piece qui a declenchee la mort subite
     joueur est un str, 'X' ou 'O'
     renvoie le couple (i, j) indices, None si aucune place a ete trouve (ne devrait pas arriver en principe)"""
     assert est_grille_valide(grille), "grille invalide"
