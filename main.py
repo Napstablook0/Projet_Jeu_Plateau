@@ -43,11 +43,11 @@ GRILLE_MILIEU = [["", "", "", "O", "", "O", "", "O"],
 
 
 
-GRILLE_FIN = [["", "", "", "O", "", "", "", ""],
-             ["X", "", "", "", "", "", "O", ""],
-             ["", "", "", "", "", "X", "", ""],
-             ["", "", "", "", "", "", "", ""],
-             ["", "", "", "", "", "", "", ""],
+GRILLE_FIN = [["", "O", "", "", "", "", "", ""],
+             ["", "", "", "", "X", "", "O", ""],
+             ["", "", "", "O", "", "", "", ""],
+             ["O", "", "", "", "O", "", "", ""],
+             ["", "", "", "O", "", "", "", ""],
              ["O", "", "O", "", "", "", "", ""],
              ["", "", "", "", "", "O", "", ""],
              ["", "", "X", "", "", "", "", ""]]
@@ -350,7 +350,7 @@ def coordonnees_vers_indices(coordonnees):
     renvoie une liste de 2 int"""
     assert est_au_bon_format(coordonnees), "coordonnees doit etre au bon format"
 
-    return [lettre_vers_nombre(coordonnees[0]) - 1, int(coordonnees[1]) - 1]
+    return lettre_vers_nombre(coordonnees[0]) - 1, int(coordonnees[1]) - 1
 
 
 def indices_vers_coordoonees(i, j):
@@ -380,7 +380,7 @@ def demander_coordonnees_piece_a_deplacer(grille):
 
     # indication pour les pairs (pour le bareme) : la fonction sont_coordonnees_correctes utilise la fonction est_dans_grille
     while not sont_coordonnees_correctes(coordonnees_entrees, grille):
-        print("les coordoonnes entrees sont invalides")
+        print("Les coordoonnes entrees sont invalides")
         coordonnees_entrees = input("Entrez les coordonnees de la piece a deplacer [A1-H8] > ")
         
     return coordonnees_entrees
@@ -399,7 +399,7 @@ def demander_coordonnees_case_arrivee(grille):
 
     # indication pour les pairs : la fonction sont_coordonnees_correctes utilise la fonction est_dans_grille
     while not sont_coordonnees_correctes(coordonnees_entrees, grille):
-        print("les coordoonnes entrees sont invalides")
+        print("Les coordoonnes entrees sont invalides")
         coordonnees_entrees = input("Entrez les coordonnees de la case d'arrivee [A1-H8] > ")
     
     return coordonnees_entrees
@@ -418,8 +418,8 @@ def demander_coordonnees_piece_supprimer(grille, liste_indices_pieces_supprimabl
     coordonnees_entrees = input("Entrez les coordonnees de la piece a supprimer [A1-H8] > ")
 
     # indication pour les pairs : la fonction sont_coordonnees_correctes utilise la fonction est_dans_grille
-    while not sont_coordonnees_correctes(coordonnees_entrees, grille) and coordonnees_vers_indices(coordonnees_entrees) in liste_indices_pieces_supprimables:
-        print("les coordoonnes entrees sont invalides ou pas celles d un piece supprimable")
+    while not (sont_coordonnees_correctes(coordonnees_entrees, grille) and coordonnees_vers_indices(coordonnees_entrees) in liste_indices_pieces_supprimables):
+        print("Les coordoonnes entrees sont invalides ou pas celles d une piece supprimable")
         coordonnees_entrees = input("Entrez les coordonnees de la piece [A1-H8] > ")
     
     return coordonnees_entrees
@@ -467,10 +467,12 @@ def deplacement(grille, depart, arrivee, joueur):
     depart_i, depart_j = coordonnees_vers_indices(depart)
     arrivee_i, arrivee_j = coordonnees_vers_indices(arrivee)
 
+    
     if est_deplacement(grille, depart, arrivee, joueur):
+        # cas de deplacement simple
         grille[depart_i][depart_j] = ""
         
-        # si mort subite, on recalcule le point d arrivee
+        # si mort subite, on recalcule le point d arrivee et supprime la piece adverse plus proche
         if arrivee_i == 0 or arrivee_i == len(grille) - 1:
 
             supprimer_piece_plus_proche(grille, arrivee_i, arrivee_j, joueur)
@@ -556,7 +558,7 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
     while not fini:
 
         while est_capture_possible(grille, joueur) and not est_capture(grille, depart, arrivee, joueur):
-            print("Une capture est possible et donc obligatoire pour le joueur : ", joueur)
+            print("Coup illegal : Une capture est possible et donc obligatoire pour le joueur : ", joueur)
             depart = demander_coordonnees_piece_a_deplacer(grille)
             arrivee = demander_coordonnees_case_arrivee(grille)
         
@@ -578,10 +580,10 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
                 
                 depart = arrivee
                 afficher_grille(grille, pieces_capturees_X, pieces_capturees_O)
-                print("une capture successive est possible et donc obligatoire pour le joueur : " + joueur)
+                print("Coup illegal : Une capture successive est possible et donc obligatoire pour le joueur :" + joueur)
                 arrivee = demander_coordonnees_case_arrivee(grille)
                 while not est_capture(grille, depart, arrivee, joueur):
-                    print("une capture successive est possible et donc obligatoire pour le joueur : " + joueur)
+                    print("Coup illegal : Une capture successive est possible et donc obligatoire pour le joueur :" + joueur)
                     arrivee = demander_coordonnees_case_arrivee(grille)
                 
             else:
