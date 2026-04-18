@@ -2,7 +2,19 @@
 # -*- coding: utf-8 -*- 
 
 
-"""Le plateau de jeu est en 8x8"""
+"""Le plateau de jeu est en 8x8,
+coordonnees grille :
+
+    1   2   3   4   5   6   7   8
+A
+B
+C
+D
+E
+F
+G
+H
+"""
 
 
 # ---------------- variables de configurations de tests ----------------
@@ -63,7 +75,7 @@ def est_grille_valide(grille):
 
 
 def est_au_bon_format(message):
-    """revoie True si coordonnees est au bon format, False sinon,
+    """revoie True si les coordonnees message est au bon format, False sinon,
     message est un str
     J8 est au bon format alors que AA, 77, 8J ne le sont pas"""
     assert type(message) == str, "message doit etre un str"
@@ -109,20 +121,108 @@ def est_dans_grille(ligne, colonne,  grille):
     return len(grille) >= colonne and len(grille[0]) >= i_ligne
 
 
-def est_deplacement_valide(grille, depart, arrivee, joueur):
-    """renvoie True si le deplacemen depart - arrivee est valide
-    depart et arrivee sont des coordonnees valides et decrivant un deplacement valide :
-    depart est un str, doit etre les coordonnees d une piece appartenant a joueur,
-    arrivee est un str, doit etre des coordonnees d une case vide
-    le deplacement depart - arrivee doit etre valide
+def est_deplacement(grille, depart, arrivee, joueur):
+    """renvoie True si le mouvement depart - arrivee est un deplacement,
+    !!! une capture n est pas un deplacement !!!
+    depart et arrivee sont des coordonnees valides :
+    depart est un str,
+    arrivee est un str,
     joueur est un str, X ou O"""
     assert est_grille_valide(grille), "grille invalide"
-    assert sont_coordonnees_correctes(depart), "coordonnees de depart non valide"
-    assert sont_coordonnees_correctes(arrivee), "coordonnees d arrivee non valide"
+    assert sont_coordonnees_correctes(depart, grille), "coordonnees de depart non valide"
+    assert sont_coordonnees_correctes(arrivee, grille), "coordonnees d arrivee non valide"
     assert joueur == "X" or joueur == "O", "joueur invalide"
 
-    # TODO
+    # converti les coordonnes en leur indice correspondant dans grille, e.g : A3 sera converti en [0, 2]
+    depart_i = lettre_vers_nombre(depart[0]) - 1
+    depart_j = int(depart[1]) - 1
+    arrivee_i = lettre_vers_nombre(arrivee[0]) - 1
+    arrivee_j = int(arrivee[1]) - 1
 
+    
+
+    if joueur == "X":
+        if grille[depart_i][depart_j] != "X":
+            return False
+        elif grille[arrivee_i][arrivee_j] != "":
+            return False
+        elif depart_i != arrivee_i - 1 and depart_i != arrivee_i + 1:
+            return False
+        elif depart_j != arrivee_j - 1 and depart_j != arrivee_j + 1:
+            return False
+        else:
+            return True
+        
+    elif joueur == "O":
+        if grille[depart_i][depart_j] != "O":
+            return False
+        elif grille[arrivee_i][arrivee_j] != "":
+            return False
+        elif depart_i != arrivee_i - 1 and depart_i != arrivee_i + 1:
+            return False
+        elif depart_j != arrivee_j - 1 and depart_j != arrivee_j + 1:
+            return False
+        else:
+            return True
+        
+    else:
+        # cas impossible
+        return False
+    
+
+
+def est_capture(grille, depart, arrivee, joueur):
+    """renvoie True si le mouvement depart - arrivee est une capture
+    depart et arrivee sont des coordonnees valides :
+    depart est un str,
+    arrivee est un str,
+    joueur est un str, X ou O"""
+    assert est_grille_valide(grille), "grille invalide"
+    assert sont_coordonnees_correctes(depart, grille), "coordonnees de depart non valide"
+    assert sont_coordonnees_correctes(arrivee, grille), "coordonnees d arrivee non valide"
+    assert joueur == "X" or joueur == "O", "joueur invalide"
+
+    # converti les coordonnes en leur indice correspondant dans grille, e.g : A3 sera converti en [0, 2]
+    depart_i = lettre_vers_nombre(depart[0]) - 1
+    depart_j = int(depart[1]) - 1
+    arrivee_i = lettre_vers_nombre(arrivee[0]) - 1
+    arrivee_j = int(arrivee[1]) - 1
+    
+    
+    if joueur == "X":
+        if grille[depart_i][depart_j] != "X":
+            return False
+        elif grille[arrivee_i][arrivee_j] != "":
+            return False
+        elif depart_i != arrivee_i - 2:
+            return False
+        elif depart_j != arrivee_j - 2 and depart_j != arrivee_j + 2:
+            return False
+        elif grille[depart_i - 1][depart_j - 1] != "O" and grille[depart_i + 1][depart_j + 1] != "O":
+            return False
+        else:
+            return True
+        
+    elif joueur == "O":
+        if grille[depart_i][depart_j] != "O":
+            return False
+        elif grille[arrivee_i][arrivee_j] != "":
+            return False
+        elif depart_i != arrivee_i + 2:
+            return False
+        elif depart_j != arrivee_j - 2 and depart_j != arrivee_j + 2:
+            return False
+        elif grille[depart_i - 1][depart_j - 1] != "X" and grille[depart_i + 1][depart_j + 1] != "X":
+            return False
+        else:
+            return True
+        
+    else:
+        # cas impossible
+        return False
+
+    
+    
 
 
 # -------------------------------- fonctions d affichage --------------------------------
@@ -434,6 +534,73 @@ def test_est_grille_valide():
     assert est_grille_valide(grille5) == False, "test est_grille_valide"
 
 
+def test_est_deplacement():
+    grille = [["", "O", "", "O", "", "O", "", "O"],
+             ["O", "", "O", "", "O", "", "O", ""],
+             ["", "O", "", "O", "", "O", "", "O"],
+             ["", "", "", "", "", "", "", ""],
+             ["", "", "", "", "", "", "", ""],
+             ["X", "", "X", "", "X", "", "X", ""],
+             ["", "X", "", "X", "", "X", "", "X"],
+             ["X", "", "X", "", "X", "", "X", ""]]
+    
+    
+    # deplacements valides
+    assert est_deplacement(grille, "F1", "E2", "X"), "test est_deplacement"
+    assert est_deplacement(grille, "F3", "E2", "X"), "test est_deplacement"
+    assert est_deplacement(grille, "F3", "E4", "X"), "test est_deplacement "
+
+    assert est_deplacement(grille, "C2", "D1", "O"), "test est_deplacement"
+    assert est_deplacement(grille, "C2", "D3", "O"), "test est_deplacement"
+    assert est_deplacement(grille, "C4", "D5", "O"), "test est_deplacement"
+
+    # deplacements invalides
+    assert est_deplacement(grille, "F2", "E3", "X") == False, "test est_deplacement"
+    assert est_deplacement(grille, "G2", "F1", "X") == False, "test est_deplacement"
+    assert est_deplacement(grille, "F3", "E3", "X") == False, "test est_deplacement "
+    assert est_deplacement(grille, "D2", "A3", "X") == False, "test est_deplacement "
+
+    assert est_deplacement(grille, "B1", "C2", "O") == False, "test est_deplacement"
+    assert est_deplacement(grille, "A2", "B1", "O") == False, "test est_deplacement"
+    assert est_deplacement(grille, "B7", "C8", "O") == False, "test est_deplacement"
+    assert est_deplacement(grille, "D2", "E3", "O") == False, "test est_deplacement"
+
+
+def test_est_capture():
+    grille =    [["", "", "", "O", "", "O", "", "O"],
+                ["", "", "O", "", "O", "", "", ""],
+                ["", "O", "", "X", "", "", "", "O"],
+                ["", "", "", "", "", "", "X", ""],
+                ["", "O", "", "", "", "O", "", ""],
+                ["X", "", "X", "", "", "", "X", ""],
+                ["", "", "", "X", "", "X", "", ""],
+                ["X", "", "X", "", "X", "", "", ""]]
+
+    # captures valides
+    assert est_capture(grille, "F1", "D3", "X"), "test est_capture"
+    assert est_capture(grille, "F3", "D1", "X"), "test est_capture"
+    assert est_capture(grille, "F7", "D5", "X"), "test est_capture"
+
+
+    assert est_capture(grille, "B5", "D3", "O"), "test est_capture"
+    assert est_capture(grille, "E6", "G8", "O"), "test est_capture"
+    assert est_capture(grille, "B3", "D5", "O"), "test est_capture"
+
+
+
+    # capture invalides
+
+    assert est_capture(grille, "C4", "A6", "X") == False, "test est_capture"
+    assert est_capture(grille, "F3", "D5", "X") == False, "test est_capture"
+
+
+    assert est_capture(grille, "E2", "G4", "O") == False, "test est_capture"
+    assert est_capture(grille, "C8", "E6", "O") == False, "test est_capture"
+
+    
+
+
+
 def tests():
     """effectue tous les tests des fonctions unitaires"""
     print("Debuts des tests ...")
@@ -442,11 +609,12 @@ def tests():
     test_est_dans_grille()
     test_est_grille_valide()
     test_lettre_vers_nombre()
+    test_est_deplacement()
     print("Tests effectues")
 
 
 # fonction pour effectuer des verification d affichage et d entree utilisateur
-def atelier_2(grille_debut, grille_milieu, grille_fin):
+def debug_verifications(grille_debut, grille_milieu, grille_fin):
     """Cette fonction ne sert que pour l evaluation par les pairs lors de l atelier 2 et effectuer des tests plus facilement"""
     assert est_grille_valide(grille_debut), "grille_debut doit etre une matrice carre de taille 8"
     assert est_grille_valide(grille_milieu), "grille_milieu doit etre une matrice carre de taille 8"
@@ -492,4 +660,4 @@ def atelier_2(grille_debut, grille_milieu, grille_fin):
 
 
 
-atelier_2(GRILLE_DEBUT, GRILLE_MILIEU, GRILLE_FIN)
+debug_verifications(GRILLE_DEBUT, GRILLE_MILIEU, GRILLE_FIN)
