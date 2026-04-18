@@ -17,6 +17,8 @@ H
 
 le joueur X est en bas et le joueur O en haut"""
 
+from math import sqrt
+
 
 # ---------------- variables de configurations de tests ----------------
 
@@ -42,13 +44,13 @@ GRILLE_MILIEU = [["", "", "", "O", "", "O", "", "O"],
 
 
 GRILLE_FIN = [["", "", "", "O", "", "", "", ""],
-             ["X", "", "", "", "", "", "", ""],
+             ["X", "", "", "", "", "", "O", ""],
+             ["", "", "", "", "", "X", "", ""],
              ["", "", "", "", "", "", "", ""],
              ["", "", "", "", "", "", "", ""],
-             ["", "", "", "", "", "", "", ""],
-             ["", "", "", "", "O", "", "", ""],
-             ["", "O", "", "", "", "", "", ""],
-             ["", "", "", "", "X", "", "", ""]]
+             ["O", "", "O", "", "", "", "", ""],
+             ["", "", "", "", "", "O", "", ""],
+             ["", "", "X", "", "", "", "", ""]]
 
 
 # -------------------------------- fonctions de verifications de valeurs --------------------------------
@@ -305,8 +307,6 @@ def afficher_grille(grille, pieces_capturees_X, pieces_capturees_O):
     assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
     
 
-    
-
     # afficher les numero des colonnes
     print("    1   2   3   4   5   6   7   8")
     print("  " + "-"*33)
@@ -405,8 +405,49 @@ def demander_coordonnees_case_arrivee(grille):
     return coordonnees_entrees
 
 
+def demander_coordonnees_piece_supprimer(grille, liste_indices_pieces_supprimables):
+    """demande a l'utilisateur deux coordonnees de la forme xy
+    avec x lettre et y entier correspondant a une case de la grille,
+    A0 correspond a la case en bas a gauche
+    x est compris enre A et H compris,
+    y est compris entre 1 et 8 compris
+    liste_indices_pieces_supprimables est une liste de couple de int
+    renvoie le str xy entre par l utilisateur faisant parti de liste_indices_pieces_supprimables"""
+    assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
 
-# -------------------------------- fonctions de deplacements --------------------------------
+    coordonnees_entrees = input("Entrez les coordonnees de la piece a supprimer [A1-H8] > ")
+
+    # indication pour les pairs : la fonction sont_coordonnees_correctes utilise la fonction est_dans_grille
+    while not sont_coordonnees_correctes(coordonnees_entrees, grille) and coordonnees_vers_indices(coordonnees_entrees) in liste_indices_pieces_supprimables:
+        print("les coordoonnes entrees sont invalides ou pas celles d un piece supprimable")
+        coordonnees_entrees = input("Entrez les coordonnees de la piece [A1-H8] > ")
+    
+    return coordonnees_entrees
+
+
+
+# -------------------------------- fonctions de controle jeu --------------------------------
+
+
+def supprimer_piece_plus_proche(grille, piece_i, piece_j, joueur):
+    """trouve et supprime la piece la plus proche, si plusieurs on demande alors a l uilisateur celle qu il souhaite supprimer, si aucun plus proche rien est supprimee
+    piece_i et piece_j sont des int, indices valides de grille
+    joueur est un str, 'X' ou 'O"""
+    assert est_grille_valide(grille), "grille invalide"
+    assert piece_i >= 0 and piece_j >= 0 and piece_i < 8 and piece_j < 8, "indices invalides"
+    assert joueur == "X" or joueur == "O", "joueur invalide"
+
+    liste_indices_pieces_plus_proches = trouver_pieces_plus_proches(grille, piece_i, piece_j, joueur)
+    if len(liste_indices_pieces_plus_proches) > 1:
+        coordonnees_pieces_a_supprimer = demander_coordonnees_piece_supprimer(grille, liste_indices_pieces_plus_proches)
+        piece_a_supprimer_i, piece_a_supprimer_j = coordonnees_vers_indices(coordonnees_pieces_a_supprimer)
+        grille[piece_a_supprimer_i][piece_a_supprimer_j] = ""
+    
+    elif len(liste_indices_pieces_plus_proches) == 1:
+        piece_a_supprimer_i, piece_a_supprimer_j = liste_indices_pieces_plus_proches[0]
+        grille[piece_a_supprimer_i][piece_a_supprimer_j] = ""
+
+
 
 
 def deplacement(grille, depart, arrivee, joueur):
@@ -415,7 +456,9 @@ def deplacement(grille, depart, arrivee, joueur):
     depart est un str, correspond a des coordonnees de grille
     arrivee est un str, correspond a des coordonnees de grille
     joueur est un str, 'X' ou 'O'
-    renvoie un str, 'deplacement' si le mouvement effectuee est un deplacement, 'capture' si c est une capture et '' si le mouvement est invalide"""
+    renvoie un couple de deux str, 
+    le premier str est 'deplacement' si le mouvement effectuee est un deplacement, 'capture' si c est une capture et '' si le mouvement est invalide
+    le deuxieme str est les coordonnees de la nouvelle case d arrivee, e.g : 'A3'"""
     assert est_grille_valide(grille), "grille non valide"
     assert sont_coordonnees_correctes(depart, grille), "coordonnees de depart non valide"
     assert sont_coordonnees_correctes(arrivee, grille), "coordonnees d arrivee non valide"
@@ -426,31 +469,43 @@ def deplacement(grille, depart, arrivee, joueur):
 
     if est_deplacement(grille, depart, arrivee, joueur):
         grille[depart_i][depart_j] = ""
+        
+        # si mort subite, on recalcule le point d arrivee
         if arrivee_i == 0 or arrivee_i == len(grille) - 1:
-            # cas mort subite
-            # TODO : creer fonction trouver indices arrivee
-            pass
-        else:
-            grille[arrivee_i][arrivee_j] = joueur
 
-        return "deplacement"
+            supprimer_piece_plus_proche(grille, arrivee_i, arrivee_j, joueur)
+
+            arrivee_i, arrivee_j = trouver_indices_mort_subite(grille, joueur)
+        
+        grille[arrivee_i][arrivee_j] = joueur
+        return "deplacement", indices_vers_coordoonees(arrivee_i, arrivee_j)
     
     elif est_capture(grille, depart, arrivee, joueur):
         grille[depart_i][depart_j] = ""
-        grille[arrivee_i][arrivee_j] = joueur
+
 
         #calcul des indices correspondant a l emplacement de la piece capturee
         piece_capturee_i = (depart_i + arrivee_i) // 2
         piece_capturee_j = (depart_j + arrivee_j) // 2
         grille[piece_capturee_i][piece_capturee_j] = ""
 
-        return "capture"
+        # si mort subite, on recalcule le point d arrivee
+        if arrivee_i == 0 or arrivee_i == len(grille) - 1:
+
+            supprimer_piece_plus_proche(grille, arrivee_i, arrivee_j, joueur)
+
+
+            arrivee_i, arrivee_j = trouver_indices_mort_subite(grille, joueur)
+    
+            
+        grille[arrivee_i][arrivee_j] = joueur
+
+        return "capture", indices_vers_coordoonees(arrivee_i, arrivee_j)
     
     else:
-        return ""
+        return "", depart
 
 
-# -------------------------------- fonctions de controle --------------------------------
 
 
 def compter_pieces(grille, joueur):
@@ -501,11 +556,11 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
     while not fini:
 
         while est_capture_possible(grille, joueur) and not est_capture(grille, depart, arrivee, joueur):
-            print("Une capture est possible et donc obligatoire !")
+            print("Une capture est possible et donc obligatoire pour le joueur : ", joueur)
             depart = demander_coordonnees_piece_a_deplacer(grille)
             arrivee = demander_coordonnees_case_arrivee(grille)
         
-        coup = deplacement(grille, depart, arrivee, joueur)
+        coup, arrivee = deplacement(grille, depart, arrivee, joueur)
         
         if coup == "deplacement":
             fini = True
@@ -519,12 +574,16 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
             if joueur == "X": pieces_capturees_O += 1
             elif joueur == "O": pieces_capturees_X += 1
             
-            if est_capture_possible(grille, joueur):
+            if est_capture_possible_depart(grille, arrivee, joueur):
                 
+                depart = arrivee
                 afficher_grille(grille, pieces_capturees_X, pieces_capturees_O)
                 print("une capture successive est possible et donc obligatoire pour le joueur : " + joueur)
-                depart = arrivee
                 arrivee = demander_coordonnees_case_arrivee(grille)
+                while not est_capture(grille, depart, arrivee, joueur):
+                    print("une capture successive est possible et donc obligatoire pour le joueur : " + joueur)
+                    arrivee = demander_coordonnees_case_arrivee(grille)
+                
             else:
                 fini = True
                 
@@ -538,10 +597,63 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
         
 
 
+def trouver_indices_mort_subite(grille, joueur):
+    """renvoie les indices de grille correspondant aux coordonnees de la case a laquelle se retrouvera la piece du joueur joueur apres un coup de mort subite
+    i.e : trouve la case d arrivee de la piece qui a declanchee la mort subite
+    joueur est un str, 'X' ou 'O'
+    renvoie le couple (i, j) indices, None si aucune place a ete trouve (ne devrait pas arriver en principe)"""
+    assert est_grille_valide(grille), "grille invalide"
+    assert joueur == "X" or joueur == "O", "joueur invalide"
+
+    if joueur == "X":
+        for i in range(7, 0, -1):
+            for j in range(7, 0, -1):
+                if grille[i][j] == "" and ((i%2==0 and j%2!=0) or i%2!=0 and j%2==0):
+                    return (i, j)
+                
+    elif joueur == "O":
+        for i in range(8):
+            for j in range(8):
+                if grille[i][j] == "" and ((i%2==0 and j%2!=0) or i%2!=0 and j%2==0):
+                    return (i, j)
+    
+    return None
 
 
 
+def trouver_pieces_plus_proches(grille, piece_i, piece_j, joueur):
+    """cherche les pieces adverse la plus proche d une piece du joueur actuel
+    coordonnees est des coordonnees valides, e.g : A3
+    joueur est un str, 'X' ou 'O'
+    renvoie une liste de couples de int"""
+    assert est_grille_valide(grille), "grille invalide"
+    assert joueur == "X" or joueur == "O", "joueur invalide"
+    assert type(piece_i) == int and type(piece_j) == int, "indices invalides"
+    assert piece_i >= 0 and piece_j >= 0 and piece_i < 8 and piece_j < 8, "indices invalides"
 
+    minimum = 100 # cette distance ne peut pas etre depassee
+    liste_indices_distance = []
+    liste_indices_minimum = []
+    
+    if joueur == "X":
+        adversaire = "O"
+    elif joueur == "O":
+        adversaire = "X"
+
+    for i in range(len(grille)):
+        for j in range(len(grille[0])):
+            if grille[i][j] == adversaire:
+                distance = sqrt((i - piece_i)**2 + (j - piece_j)**2)
+                if distance < minimum:
+                    minimum = distance
+                liste_indices_distance.append((i, j, distance))
+
+    for indices_distance in liste_indices_distance:
+        if indices_distance[2] == minimum:
+            liste_indices_minimum.append((indices_distance[0], indices_distance[1]))
+
+        
+    return liste_indices_minimum
 
 
 # -------------------------------- fonctions de tests --------------------------------
@@ -723,6 +835,9 @@ def test_est_capture():
 
     
 def test_deplacement():
+    """cette fonction ne testera pas le cas de mort subite car cela requiert des entrees utilisateur"""
+
+    
     grille =    [["", "", "", "O", "", "O", "", "O"],
                 ["", "", "O", "", "O", "", "", ""],
                 ["", "O", "", "X", "", "", "", "O"],
@@ -732,7 +847,7 @@ def test_deplacement():
                 ["", "", "", "X", "", "X", "", ""],
                 ["X", "", "X", "", "X", "", "", ""]]
     
-    assert deplacement(grille, "F3", "E4", "X") == "deplacement", "test deplacement"
+    assert deplacement(grille, "F3", "E4", "X") == ("deplacement", "E4"), "test deplacement"
     assert grille ==    [["", "", "", "O", "", "O", "", "O"],
                         ["", "", "O", "", "O", "", "", ""],
                         ["", "O", "", "X", "", "", "", "O"],
@@ -742,7 +857,7 @@ def test_deplacement():
                         ["", "", "", "X", "", "X", "", ""],
                         ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
     
-    assert deplacement(grille, "E4", "D3", "X") == "deplacement", "test deplacement"
+    assert deplacement(grille, "E4", "D3", "X") == ("deplacement", "D3"), "test deplacement"
     assert grille ==    [["", "", "", "O", "", "O", "", "O"],
                         ["", "", "O", "", "O", "", "", ""],
                         ["", "O", "", "X", "", "", "", "O"],
@@ -752,7 +867,7 @@ def test_deplacement():
                         ["", "", "", "X", "", "X", "", ""],
                         ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
     
-    assert deplacement(grille, "F1", "E3", "X") == "", "test deplacement"
+    assert deplacement(grille, "F1", "E3", "X") == ("", "F1"), "test deplacement"
     assert grille ==    [["", "", "", "O", "", "O", "", "O"],
                         ["", "", "O", "", "O", "", "", ""],
                         ["", "O", "", "X", "", "", "", "O"],
@@ -762,7 +877,7 @@ def test_deplacement():
                         ["", "", "", "X", "", "X", "", ""],
                         ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
     
-    assert deplacement(grille, "F7", "D5", "X") == "capture"
+    assert deplacement(grille, "F7", "D5", "X") == ("capture", "D5")
     assert grille ==    [["", "", "", "O", "", "O", "", "O"],
                         ["", "", "O", "", "O", "", "", ""],
                         ["", "O", "", "X", "", "", "", "O"],
@@ -773,7 +888,7 @@ def test_deplacement():
                         ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
     
 
-    assert deplacement(grille, "C2", "E4", "O") == "capture", "test deplacement"
+    assert deplacement(grille, "C2", "E4", "O") == ("capture", "E4"), "test deplacement"
     assert grille ==    [["", "", "", "O", "", "O", "", "O"],
                         ["", "", "O", "", "O", "", "", ""],
                         ["", "", "", "X", "", "", "", "O"],
@@ -783,7 +898,7 @@ def test_deplacement():
                         ["", "", "", "X", "", "X", "", ""],
                         ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
     
-    assert deplacement(grille, "B5", "C6", "O") == "deplacement", "test deplacement"
+    assert deplacement(grille, "B5", "C6", "O") == ("deplacement", "C6"), "test deplacement"
     assert grille ==    [["", "", "", "O", "", "O", "", "O"],
                         ["", "", "O", "", "", "", "", ""],
                         ["", "", "", "X", "", "O", "", "O"],
@@ -793,7 +908,7 @@ def test_deplacement():
                         ["", "", "", "X", "", "X", "", ""],
                         ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
     
-    assert deplacement(grille, "C6", "D5", "O") == "", "test deplacement"
+    assert deplacement(grille, "C6", "D5", "O") == ("", "C6"), "test deplacement"
     assert grille ==    [["", "", "", "O", "", "O", "", "O"],
                         ["", "", "O", "", "", "", "", ""],
                         ["", "", "", "X", "", "O", "", "O"],
@@ -802,6 +917,7 @@ def test_deplacement():
                         ["X", "", "", "", "", "", "", ""],
                         ["", "", "", "X", "", "X", "", ""],
                         ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
+    
     
 
 def test_est_capture_depart_possible():
@@ -867,9 +983,59 @@ def test_est_capture_possible():
     assert est_capture_possible(grille3, "X") == False, "test est_capture"
     assert est_capture_possible(grille3, "O") == False, "test est_capture"
 
+
+
+def test_trouver_indices_mort_subite(): 
+    grille1 =   [["", "", "", "O", "", "O", "", "O"],
+                ["O", "", "O", "", "O", "", "O", ""],
+                ["", "O", "", "O", "", "O", "", "O"],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["X", "", "X", "", "X", "", "X", ""],
+                ["", "X", "", "X", "", "X", "", "X"],
+                ["X", "", "X", "", "X", "", "", ""]]
     
+    grille2 =   [["", "O", "", "O", "", "", "", ""],
+                ["O", "", "O", "", "O", "", "O", ""],
+                ["", "O", "", "O", "", "O", "", "O"],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["X", "", "X", "", "X", "", "X", ""],
+                ["", "X", "", "X", "", "X", "", ""],
+                ["X", "", "X", "", "", "", "X", ""]]
+    
+    grille3 =   [["", "O", "", "O", "", "O", "", "O"],
+                ["O", "", "O", "", "O", "", "O", ""],
+                ["", "O", "", "", "", "O", "", "O"],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["X", "", "X", "", "X", "", "X", ""],
+                ["", "", "", "", "", "X", "", "X"],
+                ["X", "", "X", "", "X", "", "X", ""]]
+    
+    assert trouver_indices_mort_subite(grille1, "X") == (7, 6), "test trouver_indices_mort_subite"
+    assert trouver_indices_mort_subite(grille1, "O") == (0, 1), "test trouver_indices_mort_subite"
+    
+    assert trouver_indices_mort_subite(grille2, "X") == (7, 4), "test trouver_indices_mort_subite"
+    assert trouver_indices_mort_subite(grille2, "O") == (0, 5), "test trouver_indices_mort_subite"
+
+    assert trouver_indices_mort_subite(grille3, "X") == (6, 3), "test trouver_indices_mort_subite"
+    assert trouver_indices_mort_subite(grille3, "O") == (2, 3), "test trouver_indices_mort_subite"
 
 
+def test_trouver_pieces_plus_proches():
+    
+    grille =   [["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "X", "", "", ""],
+                ["", "", "", "", "", "O", "", ""],
+                ["", "", "", "", "X", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "O", "", "O", "", "", "", ""],
+                ["", "", "X", "", "", "", "", ""]]
+    
+    assert trouver_pieces_plus_proches(grille, 2, 6, "X") == [(3, 5)], "test trouver_pieces_plus_proches"
+    assert trouver_pieces_plus_proches(grille, 7, 2, "X") == [(6, 1), (6, 3)], "test trouver_pieces_plus_proches"
 
 def tests():
     """effectue tous les tests des fonctions unitaires"""
@@ -884,6 +1050,8 @@ def tests():
     test_deplacement()
     test_est_capture_depart_possible()
     test_est_capture_possible()
+    test_trouver_indices_mort_subite()
+    test_trouver_pieces_plus_proches()
     print("Tests effectues")
 
 
@@ -913,13 +1081,13 @@ def debug_verifications(grille_debut, grille_milieu, grille_fin):
         # suivant le choix de l utilisateur on appelle les fonctions correspondantes
         if entree_utilisateur == "1":
             afficher_grille(grille_debut, 0, 0)
-            effectuer_tour(grille_debut, "O", 0, 0)
+            effectuer_tour(grille_debut, "X", 0, 0)
         elif entree_utilisateur == "2":
             afficher_grille(grille_milieu, 3, 3)
-            effectuer_tour(grille_milieu, "O", 3, 3)
+            effectuer_tour(grille_milieu, "X", 3, 3)
         elif entree_utilisateur == "3":
             afficher_grille(grille_fin, 10, 9)
-            effectuer_tour(grille_fin, "O", 10, 9)
+            effectuer_tour(grille_fin, "X", 10, 9)
 
         elif entree_utilisateur == "4":
             coordonnes_piece_a_deplacer = demander_coordonnees_piece_a_deplacer(grille_debut)
