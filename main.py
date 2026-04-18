@@ -133,41 +133,23 @@ def est_deplacement(grille, depart, arrivee, joueur):
     assert sont_coordonnees_correctes(arrivee, grille), "coordonnees d arrivee non valide"
     assert joueur == "X" or joueur == "O", "joueur invalide"
 
-    # converti les coordonnes en leur indice correspondant dans grille, e.g : A3 sera converti en [0, 2]
-    depart_i = lettre_vers_nombre(depart[0]) - 1
-    depart_j = int(depart[1]) - 1
-    arrivee_i = lettre_vers_nombre(arrivee[0]) - 1
-    arrivee_j = int(arrivee[1]) - 1
+
+    depart_i, depart_j = coordonnees_vers_indices(depart)
+    arrivee_i, arrivee_j = coordonnees_vers_indices(arrivee)
 
     
 
-    if joueur == "X":
-        if grille[depart_i][depart_j] != "X":
-            return False
-        elif grille[arrivee_i][arrivee_j] != "":
-            return False
-        elif depart_i != arrivee_i - 1 and depart_i != arrivee_i + 1:
-            return False
-        elif depart_j != arrivee_j - 1 and depart_j != arrivee_j + 1:
-            return False
-        else:
-            return True
-        
-    elif joueur == "O":
-        if grille[depart_i][depart_j] != "O":
-            return False
-        elif grille[arrivee_i][arrivee_j] != "":
-            return False
-        elif depart_i != arrivee_i - 1 and depart_i != arrivee_i + 1:
-            return False
-        elif depart_j != arrivee_j - 1 and depart_j != arrivee_j + 1:
-            return False
-        else:
-            return True
-        
-    else:
-        # cas impossible
+    if grille[depart_i][depart_j] != joueur:
         return False
+    elif grille[arrivee_i][arrivee_j] != "":
+        return False
+    elif depart_i != arrivee_i - 1 and depart_i != arrivee_i + 1:
+        return False
+    elif depart_j != arrivee_j - 1 and depart_j != arrivee_j + 1:
+        return False
+    else:
+        return True
+        
     
 
 
@@ -182,11 +164,8 @@ def est_capture(grille, depart, arrivee, joueur):
     assert sont_coordonnees_correctes(arrivee, grille), "coordonnees d arrivee non valide"
     assert joueur == "X" or joueur == "O", "joueur invalide"
 
-    # converti les coordonnes en leur indice correspondant dans grille, e.g : A3 sera converti en [0, 2]
-    depart_i = lettre_vers_nombre(depart[0]) - 1
-    depart_j = int(depart[1]) - 1
-    arrivee_i = lettre_vers_nombre(arrivee[0]) - 1
-    arrivee_j = int(arrivee[1]) - 1
+    depart_i, depart_j = coordonnees_vers_indices(depart)
+    arrivee_i, arrivee_j = coordonnees_vers_indices(arrivee)
     
     if joueur == "X":
         if grille[depart_i][depart_j] != "X":
@@ -307,6 +286,15 @@ def lettre_vers_nombre(lettre):
     return dico_convertion[lettre]
 
 
+def coordonnees_vers_indices(coordonnees):
+    """converti des coordonnes vers des indices de liste, e.g : A3 sera converti en [0, 4]
+    coordonnees est un str
+    renvoie une liste de 2 int"""
+    assert est_au_bon_format(coordonnees), "coordonnees doit etre au bon format"
+
+    return [lettre_vers_nombre(coordonnees[0]) - 1, int(coordonnees[1]) - 1]
+
+
 
 # -------------------------------- fonctions d entrees utilisateur --------------------------------
 
@@ -350,9 +338,6 @@ def demander_coordonnees_case_arrivee(grille):
 
 
 
-
-
-
 # -------------------------------- fonctions de deplacements --------------------------------
 
 
@@ -368,7 +353,8 @@ def deplacement(grille, depart, arrivee, joueur):
     assert sont_coordonnees_correctes(arrivee), "coordonnees d arrivee non valide"
     assert joueur == "X" or joueur == "O", "joueur invalide"
 
-    # TODO
+    if est_deplacement(grille, depart, arrivee, joueur):
+        pass
 
 
 # -------------------------------- fonctions de controle --------------------------------
@@ -388,23 +374,18 @@ def compter_pieces(grille, joueur):
     return compteur
 
 
-def gagnant(grille, joueur):
-    """renvoie le str 'X' si le joueur X a gagne, 'O' si le joueur O a gagne, un str vide si la partie n est pas finie
-    joueur est un str, 'X" ou 'O'"""
-    assert est_dans_grille(grille), "grille invalide"
-    assert joueur == "X" or joueur == "O", "joueur invalide"
+def gagnant(grille):
+    """renvoie le str 'X' si le joueur X a gagne, 'O' si le joueur O a gagne, un str vide si la partie n est pas finie"""
+    assert est_grille_valide(grille), "grille invalide"
 
-    
-    if joueur == "X":
-        if compter_pieces(grille, "O") == 0:
-            return "X"
+
+    if compter_pieces(grille, "O") == 0:
+        return "X"
         
-        
-    elif joueur == "O":
-        if compter_pieces(grille, "X") == 0:
-            return "O"
-        
-    return ""
+    elif compter_pieces(grille, "X") == 0:
+        return "O"
+    else:
+        return ""
 
 
 
@@ -592,7 +573,6 @@ def test_est_capture():
 
 
     # capture invalides
-
     assert est_capture(grille, "C4", "A6", "X") == False, "test est_capture"
     assert est_capture(grille, "F3", "D5", "X") == False, "test est_capture"
 
