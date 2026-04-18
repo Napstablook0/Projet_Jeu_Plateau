@@ -231,7 +231,7 @@ def est_capture_possible_depart(grille, depart, joueur):
         return False
         
     elif joueur == "O":
-        if depart_i + 2 >= 0 and depart_j - 2 >= 0 and depart_i - 2 < 8 and depart_j - 2 < 8:
+        if depart_i + 2 >= 0 and depart_j - 2 >= 0 and depart_i + 2 < 8 and depart_j - 2 < 8:
             arrivee = indices_vers_coordoonees(depart_i + 2, depart_j - 2)
             if est_capture(grille, depart, arrivee, joueur):
                 return True
@@ -913,13 +913,13 @@ def debug_verifications(grille_debut, grille_milieu, grille_fin):
         # suivant le choix de l utilisateur on appelle les fonctions correspondantes
         if entree_utilisateur == "1":
             afficher_grille(grille_debut, 0, 0)
-            effectuer_tour(grille_debut, "X", 0, 0)
+            effectuer_tour(grille_debut, "O", 0, 0)
         elif entree_utilisateur == "2":
             afficher_grille(grille_milieu, 3, 3)
-            effectuer_tour(grille_milieu, "X", 3, 3)
+            effectuer_tour(grille_milieu, "O", 3, 3)
         elif entree_utilisateur == "3":
             afficher_grille(grille_fin, 10, 9)
-            effectuer_tour(grille_fin, "X", 10, 9)
+            effectuer_tour(grille_fin, "O", 10, 9)
 
         elif entree_utilisateur == "4":
             coordonnes_piece_a_deplacer = demander_coordonnees_piece_a_deplacer(grille_debut)
