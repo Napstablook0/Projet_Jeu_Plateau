@@ -236,7 +236,7 @@ def est_capture_possible_depart(grille, depart, joueur):
             if est_capture(grille, depart, arrivee, joueur):
                 return True
             
-        if depart_i + 2 >= 0 and depart_j + 2 >= 0 and depart_i - 2 < 8 and depart_j + 2 < 8:
+        if depart_i + 2 >= 0 and depart_j + 2 >= 0 and depart_i + 2 < 8 and depart_j + 2 < 8:
             arrivee = indices_vers_coordoonees(depart_i + 2, depart_j + 2)
             if est_capture(grille, depart, arrivee, joueur):
                 return True
