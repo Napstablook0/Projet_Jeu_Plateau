@@ -1145,5 +1145,4 @@ def debug_verifications(grille_debut, grille_milieu, grille_fin):
 
 
 
-
 debug_verifications(GRILLE_DEBUT, GRILLE_MILIEU, GRILLE_FIN)
