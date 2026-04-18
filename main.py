@@ -343,18 +343,43 @@ def demander_coordonnees_case_arrivee(grille):
 
 def deplacement(grille, depart, arrivee, joueur):
     """effectue un deplacementt si valide
-    depart et arrivee sont des coordonnees valides et decrivant un deplacement valide :
-    depart est un str, doit etre les coordonnees d une piece appartenant a joueur,
-    arrivee est un str, doit etre des coordonnees d une case vide
-    le deplacement depart - arrivee doit etre valide
-    joueur est un str, 'X' ou 'O'"""
+    depart et arrivee sont des coordonnees valides :
+    depart est un str, correspond a des coordonnees de grille
+    arrivee est un str, correspond a des coordonnees de grille
+    joueur est un str, 'X' ou 'O'
+    renvoie un str, 'deplacement' si le mouvement effectuee est un deplacement, 'capture' si c est une capture et '' si le mouvement est invalide"""
     assert est_grille_valide(grille), "grille non valide"
-    assert sont_coordonnees_correctes(depart), "coordonnees de depart non valide"
-    assert sont_coordonnees_correctes(arrivee), "coordonnees d arrivee non valide"
+    assert sont_coordonnees_correctes(depart, grille), "coordonnees de depart non valide"
+    assert sont_coordonnees_correctes(arrivee, grille), "coordonnees d arrivee non valide"
     assert joueur == "X" or joueur == "O", "joueur invalide"
 
+    depart_i, depart_j = coordonnees_vers_indices(depart)
+    arrivee_i, arrivee_j = coordonnees_vers_indices(arrivee)
+
     if est_deplacement(grille, depart, arrivee, joueur):
-        pass
+        grille[depart_i][depart_j] = ""
+        if arrivee_i == 0 or arrivee_i == len(grille) - 1:
+            # cas mort subite
+            # TODO : creer fonction trouver indices arrivee
+            pass
+        else:
+            grille[arrivee_i][arrivee_j] = joueur
+
+        return "deplacement"
+    
+    elif est_capture(grille, depart, arrivee, joueur):
+        grille[depart_i][depart_j] = ""
+        grille[arrivee_i][arrivee_j] = joueur
+
+        #calcul des indices correspondant a l emplacement de la piece capturee
+        piece_capturee_i = (depart_i + arrivee_i) // 2
+        piece_capturee_j = (depart_j + arrivee_j) // 2
+        grille[piece_capturee_i][piece_capturee_j] = ""
+
+        return "capture"
+    
+    else:
+        return ""
 
 
 # -------------------------------- fonctions de controle --------------------------------
@@ -577,12 +602,90 @@ def test_est_capture():
     assert est_capture(grille, "F3", "D5", "X") == False, "test est_capture"
 
 
-    assert est_capture(grille, "E2", "G4", "O") == False, "test est_capture"
-    assert est_capture(grille, "C8", "E6", "O") == False, "test est_capture"
+    assert est_capture(grille, "E2", "F5", "O") == False, "test est_capture"
+    assert est_capture(grille, "C2", "E4", "O") == False, "test est_capture"
 
     
+def test_deplacement():
+    grille =    [["", "", "", "O", "", "O", "", "O"],
+                ["", "", "O", "", "O", "", "", ""],
+                ["", "O", "", "X", "", "", "", "O"],
+                ["", "", "", "", "", "", "X", ""],
+                ["", "O", "", "", "", "O", "", ""],
+                ["X", "", "X", "", "", "", "X", ""],
+                ["", "", "", "X", "", "X", "", ""],
+                ["X", "", "X", "", "X", "", "", ""]]
+    
+    assert deplacement(grille, "F3", "E4", "X") == "deplacement", "test deplacement"
+    assert grille ==    [["", "", "", "O", "", "O", "", "O"],
+                        ["", "", "O", "", "O", "", "", ""],
+                        ["", "O", "", "X", "", "", "", "O"],
+                        ["", "", "", "", "", "", "X", ""],
+                        ["", "O", "", "X", "", "O", "", ""],
+                        ["X", "", "", "", "", "", "X", ""],
+                        ["", "", "", "X", "", "X", "", ""],
+                        ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
+    
+    assert deplacement(grille, "E4", "D3", "X") == "deplacement", "test deplacement"
+    assert grille ==    [["", "", "", "O", "", "O", "", "O"],
+                        ["", "", "O", "", "O", "", "", ""],
+                        ["", "O", "", "X", "", "", "", "O"],
+                        ["", "", "X", "", "", "", "X", ""],
+                        ["", "O", "", "", "", "O", "", ""],
+                        ["X", "", "", "", "", "", "X", ""],
+                        ["", "", "", "X", "", "X", "", ""],
+                        ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
+    
+    assert deplacement(grille, "F1", "E3", "X") == "", "test deplacement"
+    assert grille ==    [["", "", "", "O", "", "O", "", "O"],
+                        ["", "", "O", "", "O", "", "", ""],
+                        ["", "O", "", "X", "", "", "", "O"],
+                        ["", "", "X", "", "", "", "X", ""],
+                        ["", "O", "", "", "", "O", "", ""],
+                        ["X", "", "", "", "", "", "X", ""],
+                        ["", "", "", "X", "", "X", "", ""],
+                        ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
+    
+    assert deplacement(grille, "F7", "D5", "X") == "capture"
+    assert grille ==    [["", "", "", "O", "", "O", "", "O"],
+                        ["", "", "O", "", "O", "", "", ""],
+                        ["", "O", "", "X", "", "", "", "O"],
+                        ["", "", "X", "", "X", "", "X", ""],
+                        ["", "O", "", "", "", "", "", ""],
+                        ["X", "", "", "", "", "", "", ""],
+                        ["", "", "", "X", "", "X", "", ""],
+                        ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
+    
 
-
+    assert deplacement(grille, "C2", "E4", "O") == "capture", "test deplacement"
+    assert grille ==    [["", "", "", "O", "", "O", "", "O"],
+                        ["", "", "O", "", "O", "", "", ""],
+                        ["", "", "", "X", "", "", "", "O"],
+                        ["", "", "", "", "X", "", "X", ""],
+                        ["", "O", "", "O", "", "", "", ""],
+                        ["X", "", "", "", "", "", "", ""],
+                        ["", "", "", "X", "", "X", "", ""],
+                        ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
+    
+    assert deplacement(grille, "B5", "C6", "O") == "deplacement", "test deplacement"
+    assert grille ==    [["", "", "", "O", "", "O", "", "O"],
+                        ["", "", "O", "", "", "", "", ""],
+                        ["", "", "", "X", "", "O", "", "O"],
+                        ["", "", "", "", "X", "", "X", ""],
+                        ["", "O", "", "O", "", "", "", ""],
+                        ["X", "", "", "", "", "", "", ""],
+                        ["", "", "", "X", "", "X", "", ""],
+                        ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
+    
+    assert deplacement(grille, "C6", "D5", "O") == "", "test deplacement"
+    assert grille ==    [["", "", "", "O", "", "O", "", "O"],
+                        ["", "", "O", "", "", "", "", ""],
+                        ["", "", "", "X", "", "O", "", "O"],
+                        ["", "", "", "", "X", "", "X", ""],
+                        ["", "O", "", "O", "", "", "", ""],
+                        ["X", "", "", "", "", "", "", ""],
+                        ["", "", "", "X", "", "X", "", ""],
+                        ["X", "", "X", "", "X", "", "", ""]], "test deplacement"
 
 def tests():
     """effectue tous les tests des fonctions unitaires"""
@@ -594,6 +697,7 @@ def tests():
     test_lettre_vers_nombre()
     test_est_deplacement()
     test_est_capture()
+    test_deplacement()
     print("Tests effectues")
 
 
