@@ -33,8 +33,8 @@ GRILLE_DEBUT = [["", "O", "", "O", "", "O", "", "O"],
 GRILLE_MILIEU = [["", "", "", "O", "", "O", "", "O"],
                 ["", "", "", "", "O", "", "", ""],
                 ["", "O", "", "", "", "", "", "O"],
-                ["", "", "", "", "", "", "X", ""],
-                ["", "O", "", "", "", "O", "", ""],
+                ["", "", "", "", "O", "", "X", ""],
+                ["", "O", "", "", "", "", "", ""],
                 ["X", "", "X", "", "", "", "X", ""],
                 ["", "", "", "X", "", "X", "", "O"],
                 ["X", "", "X", "", "X", "", "", ""]]
@@ -516,12 +516,14 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
             arrivee = demander_coordonnees_case_arrivee(grille)
 
         elif coup == "capture":
-            if joueur == "X": pieces_capturees_O -= 1
-            elif joueur == "O": pieces_capturees_X -= 1
+            if joueur == "X": pieces_capturees_O += 1
+            elif joueur == "O": pieces_capturees_X += 1
             
             if est_capture_possible(grille, joueur):
-                print("une capture successive est possible et donc obligatoire")
-                depart = demander_coordonnees_piece_a_deplacer(grille)
+                
+                afficher_grille(grille, pieces_capturees_X, pieces_capturees_O)
+                print("une capture successive est possible et donc obligatoire pour le joueur : " + joueur)
+                depart = arrivee
                 arrivee = demander_coordonnees_case_arrivee(grille)
             else:
                 fini = True
