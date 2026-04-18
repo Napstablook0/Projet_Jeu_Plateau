@@ -188,17 +188,18 @@ def est_capture(grille, depart, arrivee, joueur):
     arrivee_i = lettre_vers_nombre(arrivee[0]) - 1
     arrivee_j = int(arrivee[1]) - 1
     
-    
     if joueur == "X":
         if grille[depart_i][depart_j] != "X":
             return False
         elif grille[arrivee_i][arrivee_j] != "":
             return False
-        elif depart_i != arrivee_i - 2:
+        elif arrivee_i != depart_i - 2:
             return False
         elif depart_j != arrivee_j - 2 and depart_j != arrivee_j + 2:
             return False
-        elif grille[depart_i - 1][depart_j - 1] != "O" and grille[depart_i + 1][depart_j + 1] != "O":
+        elif depart_j == arrivee_j - 2 and grille[depart_i - 1][depart_j + 1] != "O":
+            return False
+        elif depart_j == arrivee_j + 2 and grille[depart_i - 1][depart_j - 1] != "O":
             return False
         else:
             return True
@@ -208,11 +209,13 @@ def est_capture(grille, depart, arrivee, joueur):
             return False
         elif grille[arrivee_i][arrivee_j] != "":
             return False
-        elif depart_i != arrivee_i + 2:
+        elif arrivee_i != depart_i + 2:
             return False
         elif depart_j != arrivee_j - 2 and depart_j != arrivee_j + 2:
             return False
-        elif grille[depart_i - 1][depart_j - 1] != "X" and grille[depart_i + 1][depart_j + 1] != "X":
+        elif depart_j == arrivee_j - 2 and grille[depart_i + 1][depart_j + 1] != "X":
+            return False
+        elif depart_j == arrivee_j + 2 and grille[depart_i + 1][depart_j - 1] != "X":
             return False
         else:
             return True
@@ -610,6 +613,7 @@ def tests():
     test_est_grille_valide()
     test_lettre_vers_nombre()
     test_est_deplacement()
+    test_est_capture()
     print("Tests effectues")
 
 
