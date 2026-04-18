@@ -325,8 +325,6 @@ def afficher_grille(grille, pieces_capturees_X, pieces_capturees_O):
 
     
 
-
-
 # -------------------------------- fonctions de conversion --------------------------------
 
 
@@ -1039,6 +1037,41 @@ def test_trouver_pieces_plus_proches():
     assert trouver_pieces_plus_proches(grille, 2, 6, "X") == [(3, 5)], "test trouver_pieces_plus_proches"
     assert trouver_pieces_plus_proches(grille, 7, 2, "X") == [(6, 1), (6, 3)], "test trouver_pieces_plus_proches"
 
+
+def test_gagnant():
+    grille1 =   [["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "O", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "O", "", "O", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""]]
+    
+    grille2 =   [["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "X", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""]]
+    
+    grille3 =   [["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "O", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "X", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", ""]]
+    
+    assert gagnant(grille1) == "O", "test gagnant"
+    assert gagnant(grille2) == "X", "test gagnant"
+    assert gagnant(grille3) == "", "test gagnant"
+
+
+
 def tests():
     """effectue tous les tests des fonctions unitaires"""
     print("Debuts des tests ...")
@@ -1054,6 +1087,7 @@ def tests():
     test_est_capture_possible()
     test_trouver_indices_mort_subite()
     test_trouver_pieces_plus_proches()
+    test_gagnant()
     print("Tests effectues")
 
 
@@ -1062,9 +1096,9 @@ def tests():
 # fonction pour effectuer des verification d affichage et d entree utilisateur
 def debug_verifications(grille_debut, grille_milieu, grille_fin):
     """Cette fonction ne sert que pour l evaluation par les pairs et effectuer des tests plus facilement"""
-    assert est_grille_valide(grille_debut), "grille_debut doit etre une matrice carre de taille 8"
-    assert est_grille_valide(grille_milieu), "grille_milieu doit etre une matrice carre de taille 8"
-    assert est_grille_valide(grille_fin), "grille_fin doit etre une matrice carre de taille 8"
+    assert est_grille_valide(grille_debut), "grille invalide"
+    assert est_grille_valide(grille_milieu), "grille invalide"
+    assert est_grille_valide(grille_fin), "grille invalide"
 
     fin = False
     while not fin:
