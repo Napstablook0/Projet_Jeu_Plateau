@@ -217,7 +217,6 @@ def est_capture_possible_depart(grille, depart, joueur):
 
     depart_i, depart_j = coordonnees_vers_indices(depart)
     
-    print(depart_i - 2 >= 0 and depart_j + 2 >= 0 and depart_i - 2 < 8 and depart_j + 2 < 8)
     if joueur == "X":
         if depart_i - 2 >= 0 and depart_j - 2 >= 0 and depart_i - 2 < 8 and depart_j - 2 < 8:
             arrivee = indices_vers_coordoonees(depart_i - 2, depart_j - 2)
@@ -298,13 +297,13 @@ def afficher_ligne(grille, i_ligne):
     print("|")
 
 
-def afficher_grille(grille, joueur, pieces_capturees_X, pieces_capturees_O):
+def afficher_grille(grille, pieces_capturees_X, pieces_capturees_O):
     """affiche l etat actuel de la partie tel que le plateau, a qui c est le tour et les nombres de pieces capturees,
     joueur est un str, 'X' ou 'O' correspondant du joueur qui doit jouer ce tour ci
     pieces_capturees_X est un int correspondant au nombre de pieces (X) capturees par le joueur O
     pieces_capturees_O est un int correspondant au nombre de pieces (O) capturees par le joueur X"""
     assert est_grille_valide(grille), "grille doit etre une matrice de taille 8"
-    assert joueur == "0" or joueur == "X", "parametre joueur invalide"
+    
 
     
 
@@ -324,7 +323,7 @@ def afficher_grille(grille, joueur, pieces_capturees_X, pieces_capturees_O):
     print("   " + "O " * pieces_capturees_O)
     print()
 
-    print("C'est au tour du joueur : ", joueur)
+    
 
 
 
@@ -411,7 +410,7 @@ def demander_coordonnees_case_arrivee(grille):
 
 
 def deplacement(grille, depart, arrivee, joueur):
-    """effectue un deplacementt si valide
+    """effectue un deplacement si il est valide
     depart et arrivee sont des coordonnees valides :
     depart est un str, correspond a des coordonnees de grille
     arrivee est un str, correspond a des coordonnees de grille
@@ -492,22 +491,50 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
     assert est_grille_valide(grille), "grille invalide"
     assert joueur == "X" or joueur == "O", "joueur invalide"
 
-    afficher_grille(grille, joueur, pieces_capturees_X, pieces_capturees_O)
+    print("C est au tour du joueur " + joueur)
 
     depart = demander_coordonnees_piece_a_deplacer(grille)
     arrivee = demander_coordonnees_case_arrivee(grille)
 
-    est_coup_valide = est_deplacement(grille, depart, arrivee, joueur) or est_capture(grille, depart, arrivee, joueur)
 
-    while not est_coup_valide:
-        print("les coordonnees sont valides mais pas le coup lui-meme !")
-        depart = demander_coordonnees_piece_a_deplacer(grille)
-        arrivee = demander_coordonnees_case_arrivee(grille)
+    fini = False
+    while not fini:
 
-    # depart - arrivee decrit un mouvement valide, 
-   
-
+        while est_capture_possible(grille, joueur) and not est_capture(grille, depart, arrivee, joueur):
+            print("Une capture est possible et donc obligatoire !")
+            depart = demander_coordonnees_piece_a_deplacer(grille)
+            arrivee = demander_coordonnees_case_arrivee(grille)
         
+        coup = deplacement(grille, depart, arrivee, joueur)
+        
+        if coup == "deplacement":
+            fini = True
+
+        elif coup == "":
+            print("Coup illegal !")
+            depart = demander_coordonnees_piece_a_deplacer(grille)
+            arrivee = demander_coordonnees_case_arrivee(grille)
+
+        elif coup == "capture":
+            if joueur == "X": pieces_capturees_O -= 1
+            elif joueur == "O": pieces_capturees_X -= 1
+            
+            if est_capture_possible(grille, joueur):
+                print("une capture successive est possible et donc obligatoire")
+                depart = demander_coordonnees_piece_a_deplacer(grille)
+                arrivee = demander_coordonnees_case_arrivee(grille)
+            else:
+                fini = True
+                
+
+        else:
+            # cas impossible
+            pass
+    
+    
+    afficher_grille(grille, pieces_capturees_X, pieces_capturees_O)
+        
+
 
 
 
@@ -828,10 +855,6 @@ def test_est_capture_possible():
              ["", "", "", "X", "", "", "", ""],
              ["", "", "X", "", "", "", "", ""]]
     
-    
-
-
-
 
     assert est_capture_possible(grille1, "X"), "test est_capture"
     assert est_capture_possible(grille1, "O"), "test est_capture"
@@ -862,9 +885,11 @@ def tests():
     print("Tests effectues")
 
 
+
+
 # fonction pour effectuer des verification d affichage et d entree utilisateur
 def debug_verifications(grille_debut, grille_milieu, grille_fin):
-    """Cette fonction ne sert que pour l evaluation par les pairs lors de l atelier 2 et effectuer des tests plus facilement"""
+    """Cette fonction ne sert que pour l evaluation par les pairs et effectuer des tests plus facilement"""
     assert est_grille_valide(grille_debut), "grille_debut doit etre une matrice carre de taille 8"
     assert est_grille_valide(grille_milieu), "grille_milieu doit etre une matrice carre de taille 8"
     assert est_grille_valide(grille_fin), "grille_fin doit etre une matrice carre de taille 8"
@@ -885,10 +910,13 @@ def debug_verifications(grille_debut, grille_milieu, grille_fin):
 
         # suivant le choix de l utilisateur on appelle les fonctions correspondantes
         if entree_utilisateur == "1":
+            afficher_grille(grille_debut, 0, 0)
             effectuer_tour(grille_debut, "X", 0, 0)
         elif entree_utilisateur == "2":
+            afficher_grille(grille_milieu, 3, 3)
             effectuer_tour(grille_milieu, "X", 3, 3)
         elif entree_utilisateur == "3":
+            afficher_grille(grille_fin, 10, 9)
             effectuer_tour(grille_fin, "X", 10, 9)
 
         elif entree_utilisateur == "4":
