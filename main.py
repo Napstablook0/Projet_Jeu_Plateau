@@ -170,6 +170,7 @@ def est_capture(grille, depart, arrivee, joueur):
     depart_i, depart_j = coordonnees_vers_indices(depart)
     arrivee_i, arrivee_j = coordonnees_vers_indices(arrivee)
     
+    # on effectue des tests pour verifier chaque cas ou ce serait pas une capture, et si tous les tests sont passees, c est bien une capture
     if joueur == "X":
         if grille[depart_i][depart_j] != "X":
             return False
@@ -218,7 +219,8 @@ def est_capture_possible_depart(grille, depart, joueur):
 
 
     depart_i, depart_j = coordonnees_vers_indices(depart)
-    
+
+    # Suivant si la piece est sur un bord du plateau, on verifie si une capture est possible a gauche ou a droite   
     if joueur == "X":
         if depart_i - 2 >= 0 and depart_j - 2 >= 0 and depart_i - 2 < 8 and depart_j - 2 < 8:
             arrivee = indices_vers_coordoonees(depart_i - 2, depart_j - 2)
@@ -415,7 +417,7 @@ def demander_coordonnees_piece_supprimer(grille, liste_indices_pieces_supprimabl
 
     coordonnees_entrees = input("Entrez les coordonnees de la piece a supprimer [A1-H8] > ")
 
-    # indication pour les pairs : la fonction sont_coordonnees_correctes utilise la fonction est_dans_grille
+    
     while not (sont_coordonnees_correctes(coordonnees_entrees, grille) and coordonnees_vers_indices(coordonnees_entrees) in liste_indices_pieces_supprimables):
         print("Les coordoonnes entrees sont invalides ou pas celles d une piece supprimable")
         coordonnees_entrees = input("Entrez les coordonnees de la piece [A1-H8] > ")
@@ -436,17 +438,20 @@ def supprimer_piece_plus_proche(grille, piece_i, piece_j, joueur):
     assert joueur == "X" or joueur == "O", "joueur invalide"
 
     liste_indices_pieces_plus_proches = trouver_pieces_plus_proches(grille, piece_i, piece_j, joueur)
+    
+    # si plusieurs pieces a egales distances minimales, on demande a l utilisateur laquelle il souhaite supprimer
     if len(liste_indices_pieces_plus_proches) > 1:
         coordonnees_pieces_a_supprimer = demander_coordonnees_piece_supprimer(grille, liste_indices_pieces_plus_proches)
         piece_a_supprimer_i, piece_a_supprimer_j = coordonnees_vers_indices(coordonnees_pieces_a_supprimer)
         grille[piece_a_supprimer_i][piece_a_supprimer_j] = ""
     
+    # si une seule piece a distance minimale, on la supprime
     elif len(liste_indices_pieces_plus_proches) == 1:
         piece_a_supprimer_i, piece_a_supprimer_j = liste_indices_pieces_plus_proches[0]
         grille[piece_a_supprimer_i][piece_a_supprimer_j] = ""
 
 
-def effectuer_mort_subite(grille, arrivee_i, arrivee_j, joueur):
+def effectuer_mort_subite_si_possible(grille, arrivee_i, arrivee_j, joueur):
     """place une piece vers sa position d arrivee en prenant en compte le cas de mort subite
     arrivee_i et arrivee_j sont des ints indices valides de grille
     joueur est un str, 'X' ou'O'"""
@@ -489,7 +494,8 @@ def deplacement(grille, depart, arrivee, joueur):
         grille[depart_i][depart_j] = ""
         
         # si mort subite, on recalcule le point d arrivee et supprime la piece adverse plus proche
-        effectuer_mort_subite(grille, arrivee_i, arrivee_j, joueur)
+        # place ensuite la piece sur sa case d arrivee
+        effectuer_mort_subite_si_possible(grille, arrivee_i, arrivee_j, joueur)
 
         return "deplacement", indices_vers_coordoonees(arrivee_i, arrivee_j)
     
@@ -505,7 +511,7 @@ def deplacement(grille, depart, arrivee, joueur):
         grille[piece_capturee_i][piece_capturee_j] = ""
 
         # si mort subite, on recalcule le point d arrivee et supprime la piece adverse plus proche
-        effectuer_mort_subite(grille, arrivee_i, arrivee_j, joueur)
+        effectuer_mort_subite_si_possible(grille, arrivee_i, arrivee_j, joueur)
 
         return "capture", indices_vers_coordoonees(arrivee_i, arrivee_j)
     
