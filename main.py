@@ -558,17 +558,22 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
     fini = False
     while not fini:
 
+        # cette boucle permet de s assurer que si une capture soit possible elle soit obligatoire
         while est_capture_possible(grille, joueur) and not est_capture(grille, depart, arrivee, joueur):
             print("Coup illegal : Une capture est possible et donc obligatoire pour le joueur : ", joueur)
             depart = demander_coordonnees_piece_a_deplacer(grille)
             arrivee = demander_coordonnees_case_arrivee(grille)
         
+
+        # on effectue le deplacement et recupere quel de coup c etait, ainsi que le nouvel emplacement de la piece deplacee
         coup, arrivee = deplacement(grille, depart, arrivee, joueur)
         
         if coup == "deplacement":
+            # si le coup etait un deplacement simple, le tour est fini
             fini = True
 
         elif coup == "":
+            # si le coup n a pas pu s effectuer, on redemande des coordonnees et on recommence au prochain passage de boucle
             print("Coup illegal !")
             depart = demander_coordonnees_piece_a_deplacer(grille)
             arrivee = demander_coordonnees_case_arrivee(grille)
@@ -577,6 +582,7 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
             if joueur == "X": pieces_capturees_O += 1
             elif joueur == "O": pieces_capturees_X += 1
             
+            # si le joueur peut faire une capture successive, on lui demande de deplacer a nouveau cette piece
             if est_capture_possible_depart(grille, arrivee, joueur):
                 
                 depart = arrivee
@@ -588,6 +594,7 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
                     arrivee = demander_coordonnees_case_arrivee(grille)
                 
             else:
+                # si le joueur ne peut pas / plus faire de captures successives, le tour est fini
                 fini = True
                 
 
@@ -607,6 +614,8 @@ def trouver_indices_mort_subite(grille, joueur):
     renvoie le couple (i, j) indices, None si aucune place a ete trouve (ne devrait pas arriver en principe)"""
     assert est_grille_valide(grille), "grille invalide"
     assert joueur == "X" or joueur == "O", "joueur invalide"
+
+    # la formule ((i%2==0 and j%2!=0) or i%2!=0 and j%2==0) permet d avoir une case sur deux
 
     if joueur == "X":
         for i in range(7, 0, -1):
@@ -628,7 +637,7 @@ def trouver_pieces_plus_proches(grille, piece_i, piece_j, joueur):
     """cherche les pieces adverse la plus proche d une piece du joueur actuel
     coordonnees est des coordonnees valides, e.g : A3
     joueur est un str, 'X' ou 'O'
-    renvoie une liste de couples de int"""
+    renvoie une liste de couples de int indices de grille"""
     assert est_grille_valide(grille), "grille invalide"
     assert joueur == "X" or joueur == "O", "joueur invalide"
     assert type(piece_i) == int and type(piece_j) == int, "indices invalides"
@@ -643,6 +652,8 @@ def trouver_pieces_plus_proches(grille, piece_i, piece_j, joueur):
     elif joueur == "O":
         adversaire = "X"
 
+    # On cherche toutes les pieces adverses et calcule leur distances tout en cherchant la distance minimale
+
     for i in range(len(grille)):
         for j in range(len(grille[0])):
             if grille[i][j] == adversaire:
@@ -651,6 +662,7 @@ def trouver_pieces_plus_proches(grille, piece_i, piece_j, joueur):
                     minimum = distance
                 liste_indices_distance.append((i, j, distance))
 
+    # On trouve toutes les pieces dont la distance est egale a la distance minimale
     for indices_distance in liste_indices_distance:
         if indices_distance[2] == minimum:
             liste_indices_minimum.append((indices_distance[0], indices_distance[1]))
