@@ -446,6 +446,23 @@ def supprimer_piece_plus_proche(grille, piece_i, piece_j, joueur):
         grille[piece_a_supprimer_i][piece_a_supprimer_j] = ""
 
 
+def effectuer_mort_subite(grille, arrivee_i, arrivee_j, joueur):
+    """place une piece vers sa position d arrivee en prenant en compte le cas de mort subite
+    arrivee_i et arrivee_j sont des ints indices valides de grille
+    joueur est un str, 'X' ou'O'"""
+    assert est_grille_valide(grille), "grille invalide"
+    assert arrivee_i >= 0 and arrivee_j >= 0 and arrivee_i < 8 and arrivee_j < 8, "indices invalides"
+    assert joueur == "X" or joueur == "O", "joueur invalide"
+
+    if arrivee_i == 0 or arrivee_i == len(grille) - 1:
+
+        supprimer_piece_plus_proche(grille, arrivee_i, arrivee_j, joueur)
+
+        arrivee_i, arrivee_j = trouver_indices_mort_subite(grille, joueur)
+    
+            
+    grille[arrivee_i][arrivee_j] = joueur
+
 
 
 def deplacement(grille, depart, arrivee, joueur):
@@ -468,19 +485,17 @@ def deplacement(grille, depart, arrivee, joueur):
     
     if est_deplacement(grille, depart, arrivee, joueur):
         # cas de deplacement simple
+
         grille[depart_i][depart_j] = ""
         
         # si mort subite, on recalcule le point d arrivee et supprime la piece adverse plus proche
-        if arrivee_i == 0 or arrivee_i == len(grille) - 1:
+        effectuer_mort_subite(grille, arrivee_i, arrivee_j, joueur)
 
-            supprimer_piece_plus_proche(grille, arrivee_i, arrivee_j, joueur)
-
-            arrivee_i, arrivee_j = trouver_indices_mort_subite(grille, joueur)
-        
-        grille[arrivee_i][arrivee_j] = joueur
         return "deplacement", indices_vers_coordoonees(arrivee_i, arrivee_j)
     
     elif est_capture(grille, depart, arrivee, joueur):
+        # cas de capture
+
         grille[depart_i][depart_j] = ""
 
 
@@ -489,16 +504,8 @@ def deplacement(grille, depart, arrivee, joueur):
         piece_capturee_j = (depart_j + arrivee_j) // 2
         grille[piece_capturee_i][piece_capturee_j] = ""
 
-        # si mort subite, on recalcule le point d arrivee
-        if arrivee_i == 0 or arrivee_i == len(grille) - 1:
-
-            supprimer_piece_plus_proche(grille, arrivee_i, arrivee_j, joueur)
-
-
-            arrivee_i, arrivee_j = trouver_indices_mort_subite(grille, joueur)
-    
-            
-        grille[arrivee_i][arrivee_j] = joueur
+        # si mort subite, on recalcule le point d arrivee et supprime la piece adverse plus proche
+        effectuer_mort_subite(grille, arrivee_i, arrivee_j, joueur)
 
         return "capture", indices_vers_coordoonees(arrivee_i, arrivee_j)
     
@@ -587,10 +594,10 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
                 
                 depart = arrivee
                 afficher_grille(grille, pieces_capturees_X, pieces_capturees_O)
-                print("Coup illegal : Une capture successive est possible et donc obligatoire pour le joueur :" + joueur)
+                print("Une capture successive est possible et donc obligatoire pour le joueur : " + joueur)
                 arrivee = demander_coordonnees_case_arrivee(grille)
                 while not est_capture(grille, depart, arrivee, joueur):
-                    print("Coup illegal : Une capture successive est possible et donc obligatoire pour le joueur :" + joueur)
+                    print("Coup illegal : Une capture successive est possible et donc obligatoire pour le joueur : " + joueur)
                     arrivee = demander_coordonnees_case_arrivee(grille)
                 
             else:
