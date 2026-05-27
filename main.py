@@ -52,7 +52,7 @@ GRILLE_FIN = [["", "O", "", "", "", "", "", ""],
              ["", "", "", "O", "", "", "", ""],
              ["O", "", "O", "", "", "", "", ""],
              ["", "", "", "", "", "O", "", ""],
-             ["", "", "X", "", "", "", "", ""]]
+             ["X", "", "X", "", "", "", "", ""]]
 
 
 # -------------------------------- fonctions de verifications de valeurs --------------------------------
@@ -123,7 +123,7 @@ def est_dans_grille(ligne, colonne,  grille):
     assert est_grille_valide(grille), "grille doit etre une matrice carre de taille 8"
 
     i_ligne = lettre_vers_nombre(ligne)
-    return len(grille) >= colonne and len(grille[0]) >= i_ligne
+    return len(grille) >= colonne and len(grille[0]) >= i_ligne and i_ligne >= 1 and colonne >= 1
 
 
 
@@ -134,7 +134,7 @@ def est_dans_grille_indices(grille, i, j):
     grille est une matrice carre de taille 8"""
     assert est_grille_valide(grille), "grille doit etre une matrice carre de taille 8"
 
-    return len(grille) >= i and len(grille[0]) >= j
+    return 0 <= i and 0 <= j and i < len(grille) and j < len(grille[0])
 
 
 def est_deplacement(grille, depart, arrivee, joueur):
@@ -571,24 +571,27 @@ def generer_coups_possibles(grille):
 
     # cas de capture possible
     if est_capture_possible(grille, 'O'):
-        for i in range(len(grille)):
-            for j in range(len(grille) - 2):
+        
+        for i in range(len(grille) - 2):
+            for j in range(len(grille[0])):
                 if grille[i][j] == 'O':
+                    
                     # capture vers en bas a droite
                     if est_dans_grille_indices(grille, i+2, j+2):
-                        if grille[i+1][j+1] == "X":
+                        if grille[i+1][j+1] == "X" and grille[i+2][j+2] == "": # ici
                             coups_possibles.append(((i, j), (i+2, j+2)))
 
                     # capture vers en bas a gauche
-                    elif est_dans_grille_indices(grille, i-2, j+2):
-                        if grille[i-1][j+1] == "X":
-                            coups_possibles.append(((i, j), (i-2, j+2)))
+                    if est_dans_grille_indices(grille, i+2, j-2):
+                        if grille[i+1][j-1] == "X" and grille[i+2][j-2] == "": # et donc probablement la
+                            coups_possibles.append(((i, j), (i+2, j-2)))
 
 
     # cas de capture impossible donc cas de deplacement
     else:
-        for i in range(len(grille)):
-            for j in range(len(grille) - 1):
+
+        for i in range(len(grille) - 1):
+            for j in range(len(grille[0])):
                 if grille[i][j] == 'O':
                     
                     # deplacement vers en bas a droite
@@ -597,9 +600,9 @@ def generer_coups_possibles(grille):
                             coups_possibles.append(((i, j), (i+1, j+1)))
 
                     # deplacement vers en bas a gauche
-                    elif est_dans_grille_indices(grille, i-1, j+1):
-                        if grille[i+1][j+1] == "":
-                            coups_possibles.append(((i, j), (i-1, j+1)))
+                    if est_dans_grille_indices(grille, i+1, j-1):
+                        if grille[i+1][j-1] == "":
+                            coups_possibles.append(((i, j), (i+1, j-1)))
 
 
     return coups_possibles
@@ -666,7 +669,6 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
                 # si le joueur ne peut pas / plus faire de captures successives, le tour est fini
                 fini = True
                 
-
         else:
             # cas impossible
             pass
@@ -707,6 +709,29 @@ def effectuer_tour_ordinateur(grille, pieces_capturees_X, pieces_capturees_O):
     if coup == "capture":
         pieces_capturees_X += 1
 
+        # tant qu un nouvelle capture est possible, on genere a nouveau les coups possibles e les effectus
+        while est_capture_possible(grille, 'O'):
+            pieces_capturees_X += 1
+
+            coups_possibles = generer_coups_possibles(grille)
+            assert coups_possibles != [], "coups possibles vide"
+
+            coup_choisi = random.choice(coups_possibles)
+
+            i_depart = coup_choisi[0][0]
+            j_depart = coup_choisi[0][1]
+            i_arrivee = coup_choisi[1][0]
+            j_arrivee = coup_choisi[1][1]
+            depart = indices_vers_coordoonees(i_depart, j_depart)
+            arrivee = indices_vers_coordoonees(i_arrivee, j_arrivee)
+
+            assert est_deplacement(grille, depart, arrivee, 'O') or est_capture(grille, depart, arrivee, 'O'), "un deplacement genere n etait pas bon : " + depart + " : " + arrivee
+
+            coup, _ = deplacement(grille, depart, arrivee, 'O')
+            assert coup == "capture", "on vient d effectuer un coup bizzare : " + coup
+
+
+
     print("L ordinateur joue...")
     afficher_grille(grille, pieces_capturees_X, pieces_capturees_O)
 
@@ -734,6 +759,9 @@ def jouer_joueur_contre_joueur(grille):
     pieces_capturees_X = 0
     pieces_capturees_O = 0
     resultat = gagnant(grille)
+
+
+    afficher_grille(grille, pieces_capturees_X, pieces_capturees_O)
 
 
     while resultat == "":
@@ -1293,7 +1321,7 @@ def debug_verifications(grille_debut, grille_milieu, grille_fin):
         print("7 > jouer une partie en joueur contre joueur")
         print("8 > jouer une partie en joueur contre ordinateur")
         print("9 > fermer le programme\n")
-        print("Attention, les grilles ne son pas reinitialisees enre chaque tests, donc relancez le programme pour reinitialiser les configurations")
+        print("Attention, les grilles ne son pas reinitialisees entre chaque tests, donc relancez le programme pour reinitialiser les configurations")
 
         entree_utilisateur = input("En attente de votre reponse... > ")
         print()
@@ -1325,9 +1353,9 @@ def debug_verifications(grille_debut, grille_milieu, grille_fin):
             else:
                 print("Le gagnant est : ", resultat)
         elif entree_utilisateur == "7":
-            jouer_joueur_contre_joueur(grille_fin)
+            jouer_joueur_contre_joueur(grille_debut)
         elif entree_utilisateur == "8":
-            jouer_joueur_contre_ordinateur(grille_fin)
+            jouer_joueur_contre_ordinateur(grille_debut)
         elif entree_utilisateur == "9":
             fin = True
         else:
