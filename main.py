@@ -18,6 +18,8 @@ H
 le joueur X est en bas et le joueur O en haut"""
 
 from math import sqrt
+import random
+random.seed()
 
 
 # ---------------- variables de configurations de tests ----------------
@@ -122,6 +124,17 @@ def est_dans_grille(ligne, colonne,  grille):
 
     i_ligne = lettre_vers_nombre(ligne)
     return len(grille) >= colonne and len(grille[0]) >= i_ligne
+
+
+
+def est_dans_grille_indices(grille, i, j):
+    """renvoie True si la case d indices (i,j) existe dans grille, False sinon
+    i est un int,
+    j est un int,
+    grille est une matrice carre de taille 8"""
+    assert est_grille_valide(grille), "grille doit etre une matrice carre de taille 8"
+
+    return len(grille) >= i and len(grille[0]) >= j
 
 
 def est_deplacement(grille, depart, arrivee, joueur):
@@ -547,7 +560,49 @@ def gagnant(grille):
         return "O"
     else:
         return ""
+    
 
+
+def generer_coups_possibles(grille):
+    """ renvoie une liste de couples de couples d indices representant tous les coups possibles par l ordinateur, qui est 'O'"""
+    assert est_grille_valide(grille), "grille invalide"
+
+    coups_possibles = []
+
+    # cas de capture possible
+    if est_capture_possible(grille, 'O'):
+        for i in range(len(grille)):
+            for j in range(len(grille) - 2):
+                if grille[i][j] == 'O':
+                    # capture vers en bas a droite
+                    if est_dans_grille_indices(grille, i+2, j+2):
+                        if grille[i+1][j+1] == "X":
+                            coups_possibles.append(((i, j), (i+2, j+2)))
+
+                    # capture vers en bas a gauche
+                    elif est_dans_grille_indices(grille, i-2, j+2):
+                        if grille[i-1][j+1] == "X":
+                            coups_possibles.append(((i, j), (i-2, j+2)))
+
+
+    # cas de capture impossible donc cas de deplacement
+    else:
+        for i in range(len(grille)):
+            for j in range(len(grille) - 1):
+                if grille[i][j] == 'O':
+                    
+                    # deplacement vers en bas a droite
+                    if est_dans_grille_indices(grille, i+1, j+1):
+                        if grille[i+1][j+1] == "":
+                            coups_possibles.append(((i, j), (i+1, j+1)))
+
+                    # deplacement vers en bas a gauche
+                    elif est_dans_grille_indices(grille, i-1, j+1):
+                        if grille[i+1][j+1] == "":
+                            coups_possibles.append(((i, j), (i-1, j+1)))
+
+
+    return coups_possibles
 
 
 
@@ -558,7 +613,8 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
     sinon il l aurait fait au tour d avant)
     joueur est un str, 'X' ou 'O', le joueur actuel,
     pieces_capturees_X est un int, le nombre de pieces 'X' capturees
-    pieces_capturees_O est un int, le nombre de pieces 'O' capturees"""
+    pieces_capturees_O est un int, le nombre de pieces 'O' capturees
+    renvoie le couple d entiers correspondant aux nouveau (pieces_capturees_X, pieces_capturees_O)"""
     assert est_grille_valide(grille), "grille invalide"
     assert joueur == "X" or joueur == "O", "joueur invalide"
 
@@ -617,7 +673,103 @@ def effectuer_tour(grille, joueur, pieces_capturees_X, pieces_capturees_O):
     
     
     afficher_grille(grille, pieces_capturees_X, pieces_capturees_O)
+    return (pieces_capturees_X, pieces_capturees_O)
+
+
+
+def effectuer_tour_ordinateur(grille, pieces_capturees_X, pieces_capturees_O):
+    """realise le tour de l ordinateur :
+    trouve le coup a faire aleatoirement,
+    l ordinateur est le joueur 'O'
+    cette fonction pre-suppose que le tour d avant a ete effectue de facon valide (i.e : le joueur adverse ne peut pas faire de capture,
+    sinon il l aurait fait au tour d avant)
+    pieces_capturees_X est un int, le nombre de pieces 'X' capturees
+    pieces_capturees_O est un int, le nombre de pieces 'O' capturees"""
+    assert est_grille_valide(grille), "grille invalide"
+
+
+    # liste de couples de couples d indices, chaque couple represente un coup valide possible
+    coups_possibles = generer_coups_possibles(grille)
+    assert coups_possibles != [], "coups possibles vide"
+
+    coup_choisi = random.choice(coups_possibles)
+
+    i_depart = coup_choisi[0][0]
+    j_depart = coup_choisi[0][1]
+    i_arrivee = coup_choisi[1][0]
+    j_arrivee = coup_choisi[1][1]
+    depart = indices_vers_coordoonees(i_depart, j_depart)
+    arrivee = indices_vers_coordoonees(i_arrivee, j_arrivee)
+
+    assert est_deplacement(grille, depart, arrivee, 'O') or est_capture(grille, depart, arrivee, 'O'), "un deplacement genere n etait pas bon : " + depart + " : " + arrivee
+
+    coup, _ = deplacement(grille, depart, arrivee, 'O')
+    if coup == "capture":
+        pieces_capturees_X += 1
+
+    print("L ordinateur joue...")
+    afficher_grille(grille, pieces_capturees_X, pieces_capturees_O)
+
+    return (pieces_capturees_X, pieces_capturees_O)
+
+
+def changer_tour(joueur_actuel):
+    """renvoie le str 'O' si joueur_actuel est 'X', et 'X' le joueur_actuel est 'O'
+    joueur_actuel est le str 'X' ou 'O'"""
+    assert joueur_actuel == 'O' or joueur_actuel == 'X', "joueur_actuel doit etre le str 'X' ou 'O'"
+    
+    if joueur_actuel == 'X':
+        return 'O'
+    else:
+        return 'X'
+
+
+
+def jouer_joueur_contre_joueur(grille):
+    """lance une partie en joueur contre joueur
+    grille est la configuration au debut de la partie"""
+    assert est_grille_valide(grille), "grille invalide"
+
+    joueur_actuel = "X"
+    pieces_capturees_X = 0
+    pieces_capturees_O = 0
+    resultat = gagnant(grille)
+
+
+    while resultat == "":
+        pieces_capturees_X, pieces_capturees_O = effectuer_tour(grille, joueur_actuel, pieces_capturees_X, pieces_capturees_O)
+        joueur_actuel = changer_tour(joueur_actuel)
+        resultat = gagnant(grille)
+
+    print("Fin de la partie, le gagnant est : ", resultat)
+    
+
+def jouer_joueur_contre_ordinateur(grille):
+    """lance une partie en joueur contre ordinateur
+    grille est la configuration au debut de la partie"""
+    assert est_grille_valide(grille), "grille invalide"
+
+    print("Vous etes le joueur X, l ordinateur est O")
+
+    joueur_actuel = "X"
+    pieces_capturees_X = 0
+    pieces_capturees_O = 0
+    resultat = gagnant(grille)
+
+    afficher_grille(grille, pieces_capturees_X, pieces_capturees_O)
+    
+    while resultat == "":
+        if joueur_actuel == "X":
+            pieces_capturees_X, pieces_capturees_O = effectuer_tour(grille, joueur_actuel, pieces_capturees_X, pieces_capturees_O)
+        else:
+            pieces_capturees_X, pieces_capturees_O = effectuer_tour_ordinateur(grille, pieces_capturees_X, pieces_capturees_O)
         
+        joueur_actuel = changer_tour(joueur_actuel)
+        resultat = gagnant(grille)
+
+
+    print("Fin de la partie, le gagnant est : ", resultat)
+
 
 
 def trouver_indices_mort_subite(grille, joueur):
@@ -1137,7 +1289,11 @@ def debug_verifications(grille_debut, grille_milieu, grille_fin):
         print("3 > jouer un tour dans la configuration de fin")
         print("4 > appeler les fonctions de saisie de coordonnees")
         print("5 > appeler la fonction principale de tests")
-        print("6 > fermer le programme\n")
+        print("6 > appeler la fonction de verification de fin de partie sur la configuration de fin")
+        print("7 > jouer une partie en joueur contre joueur")
+        print("8 > jouer une partie en joueur contre ordinateur")
+        print("9 > fermer le programme\n")
+        print("Attention, les grilles ne son pas reinitialisees enre chaque tests, donc relancez le programme pour reinitialiser les configurations")
 
         entree_utilisateur = input("En attente de votre reponse... > ")
         print()
@@ -1163,11 +1319,20 @@ def debug_verifications(grille_debut, grille_milieu, grille_fin):
         elif entree_utilisateur == "5":
             tests()
         elif entree_utilisateur == "6":
+            resultat = gagnant(grille_fin)
+            if resultat == "":
+                print("La partie n est pas finie")
+            else:
+                print("Le gagnant est : ", resultat)
+        elif entree_utilisateur == "7":
+            jouer_joueur_contre_joueur(grille_fin)
+        elif entree_utilisateur == "8":
+            jouer_joueur_contre_ordinateur(grille_fin)
+        elif entree_utilisateur == "9":
             fin = True
         else:
             # si l'utilisateur entre quelque chose d autres, on redemande lors du prochain passage en boucle
             pass
-
-
+        
 
 debug_verifications(GRILLE_DEBUT, GRILLE_MILIEU, GRILLE_FIN)
